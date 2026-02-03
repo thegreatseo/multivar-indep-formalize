@@ -925,11 +925,13 @@ then it implies the first condition, as
 \]
 
 For \(k\in\{d,d+1\}\), let
-\[ \Phi_k(s) \defeq \frac{B_k(x_k(s))^{\frac{1}{k}}}{A_{k+1}(x_k(s))^{\frac{1}{k+1}}}. \]
-To prove~\eqref{eq:goal-reduced-1}, it is enough to show \(\Phi_{d+1}(s)\le \Phi_{d}(s)\) for all \(s\ge1\). To this end, we compute $\partial_s \log\Phi_{k}(s)$.
+\[
+    R_k(s) \defeq \frac{B_k(x_k(s))^{\frac{1}{k}}}{A_{k+1}(x_k(s))^{\frac{1}{k+1}}}.
+\]
+To prove~\eqref{eq:goal-reduced-1}, it is enough to show \(R_{d+1}(s)\le  R_{d}(s)\) for all \(s\ge1\). To this end, we compute $\partial_s \log R_{k}(s)$.
 By writing \(x\defeq x_k(s)\) and using \(A_k(x)/B_k(x) = s^k\) and \(A_{k+1}(x) = A_k(x) + 2x B_k(x)=(s^k + 2x)B_k(x)\),
 \begin{align*}
-    \partial_s \log\Phi_k(s)
+    \partial_s \log R_k(s)
     &= \left(\frac{1}{k} \frac{B_k'(x)}{B_k(x)} - \frac{1}{k+1} \frac{A_{k+1}'(x)}{A_{k+1}(x)}\right)\frac{dx}{ds}
     = \left(  \frac{1}{B_k(x)}  - \frac{2B_k(x)}{A_{k+1}(x)} \right)\frac{dx}{ds}
     \\&= \frac{s^k - 2(k-1)x - 2}{(s^k+2x) B_k(x)}\frac{dx}{ds}.
@@ -941,14 +943,14 @@ Differentiating both sides of \(A_k(x) = s^k B_k(x)\) by $s$ gives $A_k'(x)\frac
 \]
 This together with \eqref{eq:log-Phik-diff-calc-1} gives 
 \begin{equation}\label{eq:log-Phik-diff}
-    \partial_s \log\Phi_{k}(s)
+    \partial_s \log R_{k}(s)
     = -\frac{s^{k-1}}{s^{k}+2x_{k}(s)}.
 \end{equation}
 Suppose \(x_{d+1}(s) \le s x_{d}(s)\). Then \eqref{eq:log-Phik-diff} implies
 \[
-    \partial_s \log\Phi_{d+1}(s) \le \partial_s \log\Phi_{d}(s),
+    \partial_s \log R_{d+1}(s) \le \partial_s \log R_{d}(s),
 \]
-and using \(\Phi_{d+1}(1) = \Phi_{d}(1) = 1\), we have \(\Phi_{d+1}(s) \le \Phi_{d}(s)\). Thus, it suffices to show \(x_{d+1}(s)\le s x_{d}(s)\).
+and using \(R_{d+1}(1) = R_{d}(1) = 1\), we have \(R_{d+1}(s) \le R_{d}(s)\). Thus, it suffices to show \(x_{d+1}(s)\le s x_{d}(s)\).
 
 \medskip
 

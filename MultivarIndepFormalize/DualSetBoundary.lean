@@ -1,11 +1,9 @@
 /-
-**Lemma 3.5** `lem:Phi-upper-bound`
+**Lemma 3.5** `lem:Phi-upper-bound` (Phi_upper_bound)
 Φ_Δ(a₁, a₂) is essentially upper bounded in terms of a₁a₂.
 
-**Claim 3.6**
+**Claim 3.6** (xi_unique_zero)
 f has a unique zero ξ on (1,∞).
-
-**Proposition 3.7** `prop:basic-ineq-2`
 -/
 
 
@@ -24,15 +22,6 @@ Used in Claim 3.6 to define the unique zero ξ_Δ(s).
 def f_poly (Δ : ℕ) (s : ℝ) (X : ℝ) : ℝ :=
   (Δ + 1 : ℝ) * s * X ^ (2 * (Δ : ℝ)) - (Δ : ℝ) * X ^ ((Δ : ℝ) + 1) - 1
 
-/-
-**Claim 3.6**
-f has a unique zero ξ on (1,∞).
-
-**Statement**
-For \(0< s<1\), $f(X)$ has a unique zero \(\xi_\Delta (s)\) on \((1,\infty)\).
-
-f(X) is f_poly and defined as (Δ+1)a_1a_2 X^{2Δ} - Δ X^{Δ+1} - 1
--/
 noncomputable section AristotleLemmas
 
 /-
@@ -93,6 +82,15 @@ lemma h_aux_tendsto_atTop (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs : 0 < s) :
 
 end AristotleLemmas
 
+/--
+**Claim 3.6**
+f has a unique zero ξ on (1,∞).
+
+**Statement**
+For \(0< s <1\), $f(X)$ has a unique zero \(\xi_\Delta (s)\) on \((1,\infty)\).
+
+f(X) is f_poly and defined as (Δ+1)a_1a_2 X^{2Δ} - Δ X^{Δ+1} - 1
+-/
 lemma xi_unique_zero (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) :
     ∃! X : ℝ, X > 1 ∧ f_poly Δ s X = 0 := by
   -- By `f_poly_eq_h_aux_iff`, for X > 0, f_poly(X) = 0 is equivalent to h_aux(X) = Δ.
@@ -129,7 +127,6 @@ def Psi_Delta (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s <
   let ξ := xi_Δ Δ hΔ s hs₀ hs₁
   ξ - (2 / (Δ : ℝ)) * s * ξ ^ (Δ : ℝ)
 
-/- Aristotle failed to find a proof. -/
 /--
 **Lemma 3.5** `lem:Phi-upper-bound`
 Φ_Δ(a₁, a₂) is essentially upper bounded in terms of a₁a₂.
@@ -154,48 +151,3 @@ lemma Phi_upper_bound (Δ : ℕ) (hΔ : Δ ≥ 2) (a₁ a₂ : ℝ)
     Φ_Δ Δ a₁ a₂ ≤ Ψ_Δ_s + (a₁ + a₂) / (Δ : ℝ) ∧
     (a₁ = a₂ → Φ_Δ Δ a₁ a₂ = Ψ_Δ_s + (a₁ + a₂) / (Δ : ℝ)) := by
   sorry
-
-/--
-**Proposition 3.7** `prop:basic-ineq`
-
-**Statement**
-Let \(d\ge1\) and \(x,y\ge0\). Then
-\(
-  (dx+1)^{d+1} (dy+1)^{d+1} \le \bigl( (d+1)dxy + (d+1)(x+y) + 1 \bigr)^{2d}
-\).
-Equality holds if and only if \(x=y=0\).
--/
-lemma basic_ineq (d : ℕ) (hd : d ≥ 1) (x y : ℝ) (hx : x ≥ 0) (hy : y ≥ 0) :
-    ((d : ℝ) * x + 1) ^ ((d : ℝ) + 1) * ((d : ℝ) * y + 1) ^ ((d : ℝ) + 1) ≤
-    ((d + 1 : ℝ) * d * x * y + (d + 1 : ℝ) * (x + y) + 1) ^ (2 * (d : ℝ)) ∧
-    (((d : ℝ) * x + 1) ^ ((d : ℝ) + 1) * ((d : ℝ) * y + 1) ^ ((d : ℝ) + 1) =
-    ((d + 1 : ℝ) * d * x * y + (d + 1 : ℝ) * (x + y) + 1) ^ (2 * (d : ℝ)) ↔ x = 0 ∧ y = 0) := by
-  constructor;
-  · norm_cast ; norm_num [ mul_pow ];
-    rw [ ← mul_pow ];
-    refine' le_trans ( pow_le_pow_left₀ ( by positivity ) ( show ( ( d : ℝ ) * x + 1 ) * ( ( d : ℝ ) * y + 1 ) ≤ ( ( d + 1 ) * ( d : ℝ ) * x * y + ( d + 1 ) * ( x + y ) + 1 ) by nlinarith [ mul_nonneg hx hy, mul_nonneg hx ( sq_nonneg y ), mul_nonneg hy ( sq_nonneg x ) ] ) _ ) _;
-    exact pow_le_pow_right₀ ( by nlinarith [ mul_nonneg hx hy, mul_nonneg ( Nat.cast_nonneg d ) hx, mul_nonneg ( Nat.cast_nonneg d ) hy ] ) ( by linarith );
-  · constructor;
-    · contrapose!;
-      -- Assume $x \neq 0$ or $y \neq 0$. Without loss of generality, assume $x \neq 0$.
-      intro hxy
-      by_cases hx0 : x = 0;
-      · rcases d with ( _ | _ | d ) <;> simp_all +decide;
-        · norm_num; nlinarith [ mul_self_pos.2 hxy ];
-        · norm_cast;
-          refine' ne_of_lt ( lt_of_lt_of_le _ ( pow_le_pow_right₀ ( by nlinarith [ show ( 0 : ℝ ) < y by positivity ] ) ( show 2 * ( d + 1 + 1 ) ≥ d + 1 + 1 + 1 by linarith ) ) );
-          gcongr ; norm_num;
-      · by_cases hy0 : y = 0 <;> simp_all +decide [ Real.rpow_add, Real.rpow_mul ];
-        · norm_cast ; norm_num [ pow_mul' ];
-          rw [ ← pow_mul' ];
-          refine' ne_of_lt ( lt_of_lt_of_le _ ( pow_le_pow_right₀ ( by nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast ] ) ( show d + 1 ≤ 2 * d by linarith ) ) );
-          gcongr ; nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast, show x > 0 by positivity ];
-        · -- By simplifying, we can see that the inequality holds strictly for $x, y > 0$.
-          have h_simp : ((d * x + 1) * (d * y + 1)) ^ (d + 1 : ℝ) < (((d + 1) * d * x * y + (d + 1) * (x + y) + 1) ^ (2 * d : ℝ)) := by
-            field_simp;
-            -- By simplifying, we can see that the inequality holds strictly for $x, y > 0$ because the right-hand side grows faster than the left-hand side.
-            have h_simp : ((d * x + 1) * (d * y + 1)) < ((d + 1) * (d * x * y + (x + y)) + 1) := by
-              nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast, show 0 < x * y by positivity, show 0 < x by positivity, show 0 < y by positivity, mul_le_mul_of_nonneg_left ( show ( d : ℝ ) ≥ 1 by norm_cast ) hx, mul_le_mul_of_nonneg_left ( show ( d : ℝ ) ≥ 1 by norm_cast ) hy ];
-            exact lt_of_lt_of_le ( Real.rpow_lt_rpow ( by positivity ) h_simp ( by positivity ) ) ( Real.rpow_le_rpow_of_exponent_le ( by nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast, mul_nonneg hx hy ] ) ( by norm_cast; linarith ) );
-          rw [ ← Real.mul_rpow ( by positivity ) ( by positivity ) ] ; exact ne_of_lt h_simp;
-    · aesop
