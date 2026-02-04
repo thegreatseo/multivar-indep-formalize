@@ -37,15 +37,21 @@ lemma semiproper_poly_recurrence (v : V) (η μ : V → ℝ) (w : V) :
       η w * Z_G_2 G_minus_v η_sub μ_rest +
       μ w * Z_G_2 G_minus_v η_rest μ_sub := by
   /-
-  PROOF SKETCH:
-  1. Expand the definition of Z_G_2 as a sum over pairs of disjoint independent sets (I, J).
-  2. Partition the sum into three cases based on the membership of vertex w:
-     - Case 1: w ∉ I and w ∉ J. This corresponds to Z_G_2 on G \ {w}.
-     - Case 2: w ∈ I (and thus w ∉ J). Since I is an independent set, no neighbor
-       v ∈ N(w) can be in I. This is equivalent to setting η_v = 0 for all v ∈ N(w).
-     - Case 3: w ∈ J (and thus w ∉ I). Similarly, no neighbor v ∈ N(w) can be in J,
-       equivalent to setting μ_v = 0 for all v ∈ N(w).
-  3. Factor out η_w and μ_w from the respective sums to match the recurrence terms.
+  USE THE FOLLOWING PROOF STRATEGY:
+  1. EXPAND DEFINITION: Express Z_G_2 as a double sum over pairs of
+     [cite_start]independent sets (I, J) such that I ∩ J = ∅[cite: 117, 493].
+  2. PARTITION BY VERTEX w: Categorize pairs (I, J) into three exhaustive
+     [cite_start]cases based on the membership of vertex w[cite: 115, 494]:
+     - Case 1 (Neither): w ∉ I and w ∉ J. This sum is equivalent to
+       Z_G_2 on the reduced graph G \ {w}.
+     - Case 2 (In I): w ∈ I (implies w ∉ J). Since I is independent,
+       no neighbor v ∈ N(w) can be in I. This is equivalent to setting
+       η_v = 0 for all v ∈ N(w).
+     - Case 3 (In J): w ∈ J (implies w ∉ I). Similarly, no neighbor
+       v ∈ N(w) can be in J, equivalent to setting μ_v = 0 for all v ∈ N(w).
+  3. FACTOR FUGACITIES: Pull the terms η_w and μ_w out of their
+     respective summations to match the three terms of the recurrence
+     [cite_start]relation[cite: 115, 494].
   -/
   sorry
 
@@ -71,32 +77,27 @@ theorem semiproper_multiaff_lower_bd (η μ : V → ℝ)
   /-
   USE THE FOLLOWING PROOF STRATEGY:
   1. INDUCTION SETUP:
-     - Proceed by induction on the size of the vertex set |V|[cite: 111, 490].
-     - Base Case (|V|=1): The inequality is an equality, as the product has one
-       term with d_v=0, matching the definition of Z_K₁^{(2)}[cite: 112, 490].
-     - Inductive Step: Assume the bound holds for all graphs with |V|-1 vertices.
-
+     - [cite_start]Proceed by induction on the vertex set size |V|[cite: 112, 490].
+     - Base Case (|V|=1): The inequality holds as an equality since the
+       [cite_start]product contains one term with d_v = 0, matching Z_K₁^{(2)}[cite: 112, 490].
+     - Inductive Step: Assume the lower bound holds for all graphs
+       [cite_start]with |V|-1 vertices[cite: 112, 490].
   2. VERTEX DELETION:
-     - Pick a vertex w with maximum degree Δ = Δ(G).
-     - Apply the recurrence relation (semiproper_poly_recurrence)[cite: 115, 494]:
-       Z_G2(η, μ) = Z_{G\w}2 + η_w * Z_{G\w}2|_{N(w)=0} + μ_w * Z_{G\w}2|_{μ=0, N(w)=0}.
-     - Apply the induction hypothesis to the three partition functions on G \ {w}[cite: 116, 496].
-
+     - [cite_start]Select a vertex w with maximum degree Δ = Δ(G)[cite: 113, 491].
+     - [cite_start]Apply semiproper_poly_recurrence to decompose Z_G_2(η, μ)[cite: 115, 494].
+     - Apply the induction hypothesis to the three partition functions
+       [cite_start]on the subgraph G \ {w}[cite: 116, 496].
   3. LOCAL REDUCTION:
-     - Factor out the common terms for vertices v ∉ {w} ∪ N(w)[cite: 117, 507].
-     - Let A_d(η, μ) = Z_{K_d}^{(2)}(η, μ) and B_d(η) = Z_{K_d}^{(1)}(η)[cite: 117, 512, 513].
-     - The goal reduces to proving the technical inequality (3.2)[cite: 117, 511]:
-       ∏_{v∈N(w)} A_{d_v}(η_v, μ_v)^{1/d_v} + η_w ∏_{v∈N(w)} B_{d_v}(μ_v)^{1/d_v}
-       + μ_w ∏_{v∈N(w)} B_{d_v}(η_v)^{1/d_v} ≥ A_{Δ+1}(η_w, μ_w)^{1/(Δ+1)} ∏_{v∈N(w)} A_{d_v+1}(η_v, μ_v)^{1/(d_v+1)}.
-
+     - [cite_start]Cancel out shared product factors for all vertices v ∉ {w} ∪ N(w)[cite: 117, 507].
+     - [cite_start]Use definitions A_d(η, μ) = Z_{K_d}^{(2)}(η, μ) and B_d(η) = Z_{K_d}^{(1)}(η)[cite: 117, 512, 513].
+     - [cite_start]Reduce the problem to verifying the neighborhood inequality (3.2)[cite: 117, 511].
   4. DUAL SET MEMBERSHIP:
-     - Divide both sides by the RHS product term. The inequality is equivalent to
-       showing that a specific weight triple is in the dual set S_Δ[cite: 132, 544].
-     - The triple is exactly the one defined in Lemma 3.2 (SΔ_membership)[cite: 134, 546].
-
+     - Divide the inequality by the RHS product to show that the
+       [cite_start]resulting weight triple is in the dual set S_Δ[cite: 132, 544].
+     - [cite_start]Identify this triple as the one defined in Lemma 3.2 (lem_Sn_membership)[cite: 134, 546].
   5. CONCLUSION:
-     - Invoke Lemma 3.2, which proves this membership by combining Lemma 3.3
-       (the separate reduction) and Lemma 3.4 (log-convexity)[cite: 136, 550].
-     - This confirms the local inequality holds, completing the inductive step.
+     - Complete the inductive step by invoking Lemma 3.2, which proves
+       membership via separate reduction (Lemma 3.3) and log-convexity
+       [cite_start]of the dual set (Lemma 3.4)[cite: 136, 550].
   -/
   sorry

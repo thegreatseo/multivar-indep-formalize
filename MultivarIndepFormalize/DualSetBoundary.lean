@@ -148,4 +148,37 @@ lemma Phi_upper_bound (Δ : ℕ) (hΔ : Δ ≥ 2) (a₁ a₂ : ℝ)
     let Ψ_Δ_s := Ψ_Δ s hs₀ hs₁
     Φ_Δ Δ a₁ a₂ ≤ Ψ_Δ_s + (a₁ + a₂) / (Δ : ℝ) ∧
     (a₁ = a₂ → Φ_Δ Δ a₁ a₂ = Ψ_Δ_s + (a₁ + a₂) / (Δ : ℝ)) := by
+  /-
+  USE THE FOLLOWING PROOF STRATEGY:
+  1. VARIATIONAL DEFINITION:
+     - Recall Φ_Δ(a₁, a₂) = sup_{x,y ≥ 0} (A_{Δ+1}(x,y)^{1/(Δ+1)} - a₁x - a₂y)[cite: 588].
+     - This supremum is attained at the critical point (x_*, y_*) where the partial
+       derivatives of A_{Δ+1}^{1/(Δ+1)} match a₁ and a₂[cite: 165].
+
+  2. IDENTIFY CRITICAL POINT (x_*, y_*):
+     - Let ξ := A_{Δ+1}(x_*, y_*)^{1/(Δ+1)}.
+     - The first-order conditions imply:
+       a₁ = (1 + Δy_*)ξ⁻ᵈ and a₂ = (1 + Δx_*)ξ⁻ᵈ[cite: 166, 598].
+     - Substituting these into the identity (Δ+1)(Δx+1)(Δy+1) = ΔA_{Δ+1} + 1
+       shows that ξ must be the unique zero of the polynomial:
+       f(X) = (Δ+1)a₁a₂X^{2Δ} - ΔX^{Δ+1} - 1[cite: 167, 598].
+
+  3. USE THE PSI_DELTA AUXILIARY FUNCTION:
+     - By Claim 3.6, f(X) has a unique zero ξ_Δ(s) > 1 for 0 < s < 1[cite: 169, 600].
+     - Solve for x_* and y_* in terms of ξ_Δ(s):
+       x_* = (a₂ * ξ_Δ(s)^Δ - 1) / Δ and y_* = (a₁ * ξ_Δ(s)^Δ - 1) / Δ[cite: 174, 605].
+
+  4. DOMAIN EXTENSION & CONCAVITY:
+     - Define the convex set Ω := {(x,y) : A_{Δ+1}(x,y) > 0, y > -1/Δ}[cite: 177, 607].
+     - Since A_{Δ+1}^{1/(Δ+1)} is concave on Ω (Lemma 3.1), the value at the critical
+       point (x_*, y_*) provides a global upper bound for the supremum[cite: 180, 611].
+     - Substitution yields:
+       Φ_Δ ≤ ξ_Δ(s) - (2/Δ)s * ξ_Δ(s)^Δ + (a₁ + a₂)/Δ.
+     - The first term is exactly the definition of Ψ_Δ(s)[cite: 181, 613].
+
+  5. SYMMETRIC CASE (a₁ = a₂):
+     - If a₁ = a₂ = √s, then x_* = y_* > 0 because a₁ * ξ_Δ(s)^Δ > 1[cite: 183, 615].
+     - Since (x_*, y_*) lies in the interior of the nonnegative quadrant,
+       the supremum is exactly attained at this point, resulting in equality[cite: 184, 616].
+  -/
   sorry
