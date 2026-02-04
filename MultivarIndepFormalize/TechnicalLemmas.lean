@@ -58,7 +58,7 @@ Sufficient condition for the concavity of f^(1/(d+1)) based on the second deriva
 lemma concave_rpow_of_condition (d : ℕ) (hd : d ≥ 1) (f : ℝ → ℝ) (S : Set ℝ)
     (hS : Convex ℝ S) (hf_pos : ∀ t ∈ S, f t > 0)
     (hf_diff : DifferentiableOn ℝ f S) (hf_diff2 : DifferentiableOn ℝ (deriv f) (interior S))
-    (h_cond : ∀ t ∈ interior S, f t * deriv (deriv f) t ≤ (d / (d + 1 : ℝ)) * (deriv f t)^2) :
+    (h_cond : ∀ t ∈ interior S, f t * deriv (deriv f) t ≤ (d / (d + 1 : ℝ)) * (deriv f t) ^ 2) :
     ConcaveOn ℝ S (fun t => f t ^ (1 / (d + 1 : ℝ))) := by
       apply_rules [ concaveOn_of_deriv2_nonpos ];
       · exact ContinuousOn.rpow ( hf_diff.continuousOn ) continuousOn_const fun t ht => Or.inl <| ne_of_gt <| hf_pos t ht;
@@ -87,7 +87,7 @@ lemma concave_rpow_of_condition (d : ℕ) (hd : d ≥ 1) (f : ℝ → ℝ) (S : 
         have := h_cond t ht;
         -- Factor out $f(t)^{1/(d+1)-2}$ from the expression.
         suffices h_factor : (1 / (d + 1) : ℝ) * (1 / (d + 1) - 1) * (deriv f t) ^ 2 + (1 / (d + 1) : ℝ) * f t * deriv (deriv f) t ≤ 0 by
-          convert mul_nonpos_of_nonpos_of_nonneg h_factor ( Real.rpow_nonneg ( le_of_lt ( hf_pos t ( interior_subset ht ) ) ) ( 1 / ( d + 1 : ℝ ) - 2 ) ) using 1 ; ring;
+          convert mul_nonpos_of_nonpos_of_nonneg h_factor ( Real.rpow_nonneg ( le_of_lt ( hf_pos t ( interior_subset ht ) ) ) ( 1 / ( d + 1 : ℝ ) - 2 ) ) using 1 ; ring_nf;
           rw [ show ( -1 + ( 1 + d : ℝ ) ⁻¹ ) = ( -2 + ( 1 + d : ℝ ) ⁻¹ ) + 1 by ring, Real.rpow_add_one ( ne_of_gt ( hf_pos t ( interior_subset ht ) ) ) ] ; ring;
         field_simp;
         rw [ div_mul_eq_mul_div, le_div_iff₀ ] at this <;> nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast ]

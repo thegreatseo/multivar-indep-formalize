@@ -6,8 +6,8 @@
 f has a unique zero ξ on (1,∞).
 -/
 
-
 import MultivarIndepFormalize.Definitions
+import MultivarIndepFormalize.TechnicalLemmas
 
 set_option linter.style.longLine false
 
@@ -21,8 +21,6 @@ Used in Claim 3.6 to define the unique zero ξ_Δ(s).
 -/
 def f_poly (Δ : ℕ) (s : ℝ) (X : ℝ) : ℝ :=
   (Δ + 1 : ℝ) * s * X ^ (2 * (Δ : ℝ)) - (Δ : ℝ) * X ^ ((Δ : ℝ) + 1) - 1
-
-noncomputable section AristotleLemmas
 
 /-
 Auxiliary function h(X) = (Δ+1)s X^{Δ-1} - X^{-(Δ+1)}. Used to transform the equation f(X)=0 into h(X)=Δ.
@@ -80,7 +78,6 @@ lemma h_aux_tendsto_atTop (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs : 0 < s) :
       convert h_term1.atTop_add h_term2 using 1 ; ring;
       ext; unfold h_aux; ring
 
-end AristotleLemmas
 
 /--
 **Claim 3.6**
@@ -126,6 +123,7 @@ Matches source definition.
 def Psi_Delta (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) : ℝ :=
   let ξ := xi_Δ Δ hΔ s hs₀ hs₁
   ξ - (2 / (Δ : ℝ)) * s * ξ ^ (Δ : ℝ)
+
 
 /--
 **Lemma 3.5** `lem:Phi-upper-bound`

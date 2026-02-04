@@ -25,22 +25,6 @@ open SimpleGraph Finset BigOperators Real
 
 variable {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
 
-def SimpleGraph.indepSets : Finset (Finset V) :=
-  univ.filter (fun s => G.IsIndepSet s)
-
-/-
-The partition function Z_G^{(2)}(λ, μ) defined as the sum over pairs of disjoint independent sets (I, J) of (prod_{v in I} λ_v) * (prod_{u in J} μ_u).
--/
-noncomputable def SimpleGraph.ZG2 {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
-    (lambda : V → ℝ) (mu : V → ℝ) : ℝ :=
-  ∑ I ∈ G.indepSets, ∑ J ∈ G.indepSets, if Disjoint I J then (∏ v ∈ I, lambda v) * (∏ u ∈ J, mu u) else 0
-
-/-
-The term appearing in the lower bound of Theorem 1.4: (d+1)dλμ + (d+1)(λ+μ) + 1.
--/
-noncomputable def SimpleGraph.ZG2_lower_bound_term (d : ℕ) (lambda mu : ℝ) : ℝ :=
-  (d + 1) * d * lambda * mu + (d + 1) * (lambda + mu) + 1
-
 /--
 The multivariate partition function for semiproper colorings.
 Matches the definition: Σ_{I, J ∈ ℐ(G), I ∩ J = ∅} (Π_{v ∈ I} λ_v) (Π_{u ∈ J} μ_u)

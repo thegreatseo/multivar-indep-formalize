@@ -168,8 +168,9 @@ lemma Sd_closed_under_geom_mean (d : ℕ) (hd : d ≥ 2) (a b : ℝ × ℝ × �
       -- By definition of $h_hom$, we know that $h_hom(w1, x1, y1) * h_hom(w2, x2, y2) \geq h_hom(1, x, y)^2$.
       have h_h_hom_prod : h_hom d (Real.sqrt (b.1 / a.1)) (x * Real.sqrt (b.2.1 / a.2.1)) (y * Real.sqrt (b.2.2 / a.2.2)) * h_hom d (Real.sqrt (a.1 / b.1)) (x * Real.sqrt (a.2.1 / b.2.1)) (y * Real.sqrt (a.2.2 / b.2.2)) ≥ h_hom d 1 x y ^ 2 := by
         have := h_hom_CS d hd ( Real.sqrt ( b.1 / a.1 ) ) ( x * Real.sqrt ( b.2.1 / a.2.1 ) ) ( y * Real.sqrt ( b.2.2 / a.2.2 ) ) ( Real.sqrt ( a.1 / b.1 ) ) ( x * Real.sqrt ( a.2.1 / b.2.1 ) ) ( y * Real.sqrt ( a.2.2 / b.2.2 ) ) ?_ ?_ ?_ ?_ ?_ ?_ <;> norm_num at *;
-        · convert this using 3 <;> norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ] ; ring ; norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ] ;
-          · rw [ Real.sqrt_sq hx ];
+        · convert this using 3 <;> norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ] ; ring ;
+          · norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ] ;
+            rw [ Real.sqrt_sq hx ];
           · ring_nf; norm_num [ ha.2.2.1.le, hb.2.2.1.le, ne_of_gt ha.2.2.1, ne_of_gt hb.2.2.1 ] ;
             rw [ Real.sqrt_sq hy ];
         · positivity;
