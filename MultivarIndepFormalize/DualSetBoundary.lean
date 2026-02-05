@@ -451,7 +451,50 @@ lemma symmetric_equality (Δ : ℕ) (hΔ : 2 ≤ Δ) (a : ℝ) (ha₀ : 0 < a) (
      - Recognizing a^2 = s, the parenthetical term is exactly Psi_Delta Δ hΔ s hs₀ hs₁[cite: 181, 613].
      - This confirms Φ_Δ Δ a a = Psi_Delta Δ hΔ s hs₀ hs₁ + (2 * a) / Δ[cite: 184, 616].
   -/
-  sorry
+  refine' ⟨ _, le_antisymm _ _ ⟩
+  all_goals generalize_proofs at *;
+  · convert symmetric_critical_point_pos Δ hΔ a ha₀ ha₁ using 1;
+  · convert symmetric_pointwise_upper_bound Δ hΔ a ha₀ ha₁ |> fun h => ciSup_le fun x => ?_ using 1
+    generalize_proofs at *;
+    · by_cases hx : 0 ≤ x <;> simp_all +decide [ ciSup_eq_ite ];
+      · refine' ciSup_le fun y => _;
+        split_ifs <;> [ linarith [ h x y hx ( by linarith ) ] ; linarith [ show 0 ≤ Psi_Delta Δ hΔ ( a * a ) ‹_› ‹_› + 2 * a / Δ from by
+                                                                            specialize h 0 0 ; norm_num at h;
+                                                                            exact le_trans ( Real.rpow_nonneg ( by unfold A_d; norm_num ) _ ) h ] ];
+      · rw [ if_neg hx.not_le ];
+        have := h 0 0 le_rfl le_rfl; norm_num [ A_d ] at this;
+        linarith;
+    · exact fun _ => ⟨ 0 ⟩;
+  · -- Let's choose any $x, y \geq 0$ and show that $f(x, y) \leq C$.
+    have h_le_C : ∀ x y : ℝ, x ≥ 0 → y ≥ 0 → (A_d (Δ + 1) x y) ^ (1 / (Δ + 1 : ℝ)) - a * x - a * y ≤ Psi_Delta Δ hΔ (a * a) (by linarith) (by linarith) + 2 * a / (Δ : ℝ) := by
+      convert symmetric_pointwise_upper_bound Δ hΔ a ha₀ ha₁ using 1;
+    have h_eq_C : (A_d (Δ + 1) ((a * xi_Δ Δ hΔ (a * a) (by linarith) (by linarith) ^ Δ - 1) / Δ) ((a * xi_Δ Δ hΔ (a * a) (by linarith) (by linarith) ^ Δ - 1) / Δ)) ^ (1 / (Δ + 1 : ℝ)) - a * ((a * xi_Δ Δ hΔ (a * a) (by linarith) (by linarith) ^ Δ - 1) / Δ) - a * ((a * xi_Δ Δ hΔ (a * a) (by linarith) (by linarith) ^ Δ - 1) / Δ) = Psi_Delta Δ hΔ (a * a) (by linarith) (by linarith) + 2 * a / (Δ : ℝ) := by
+      convert symmetric_value_at_critical Δ hΔ a ha₀ ha₁ using 1;
+    refine' le_trans _ ( le_ciSup _ ( ( a * xi_Δ Δ hΔ ( a * a ) ( by linarith ) ( by linarith ) ^ Δ - 1 ) / Δ ) );
+    · rw [ @ciSup_eq_ite ];
+      split_ifs <;> norm_num at *;
+      · refine' le_trans _ ( le_ciSup _ ( ( a * xi_Δ Δ hΔ ( a * a ) ( by linarith ) ( by linarith ) ^ Δ - 1 ) / Δ ) );
+        · rw [ @ciSup_eq_ite ] ; aesop;
+        · refine' ⟨ Psi_Delta Δ hΔ ( a * a ) ( by linarith ) ( by linarith ) + 2 * a / ( Δ : ℝ ), Set.forall_mem_range.2 fun y => _ ⟩;
+          rw [ @ciSup_eq_ite ] ; norm_num;
+          split_ifs <;> [ linarith [ h_le_C ( ( a * xi_Δ Δ hΔ ( a * a ) ( by linarith ) ( by linarith ) ^ Δ - 1 ) / Δ ) y ( by linarith ) ( by linarith ) ] ; linarith [ show 0 ≤ Psi_Delta Δ hΔ ( a * a ) ( by linarith ) ( by linarith ) + 2 * a / ( Δ : ℝ ) from by
+                                                                                                                                                                          have := h_le_C 0 0; norm_num at this;
+                                                                                                                                                                          exact le_trans ( Real.rpow_nonneg ( by unfold A_d; norm_num ) _ ) this ] ];
+      · have h_pos : 0 < (a * xi_Δ Δ hΔ (a * a) (by linarith) (by linarith) ^ Δ - 1) / Δ := by
+          apply symmetric_critical_point_pos Δ hΔ a ha₀ ha₁;
+        linarith;
+    · refine' ⟨ Psi_Delta Δ hΔ ( a * a ) ( by linarith ) ( by linarith ) + 2 * a / ( Δ : ℝ ), Set.forall_mem_range.2 fun x => _ ⟩;
+      rw [ @ciSup_eq_ite ];
+      split_ifs <;> norm_num;
+      · refine' ciSup_le fun y => _;
+        rw [ @ciSup_eq_ite ] ; norm_num;
+        split_ifs <;> norm_num at * ; aesop;
+        contrapose! h_le_C;
+        refine' ⟨ 0, 0, _, _, _ ⟩ <;> norm_num;
+        exact h_le_C.trans_le ( Real.rpow_nonneg ( by unfold A_d; norm_num ) _ );
+      · refine' le_trans _ ( h_le_C 0 0 ( by norm_num ) ( by norm_num ) ) ; norm_num;
+        unfold A_d; norm_num
+
 
 /--
 **Lemma 3.5** `lem:Phi-upper-bound`
