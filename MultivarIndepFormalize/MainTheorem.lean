@@ -39,9 +39,9 @@ lemma semiproper_poly_recurrence (v : V) (η μ : V → ℝ) (w : V) :
   /-
   USE THE FOLLOWING PROOF STRATEGY:
   1. EXPAND DEFINITION: Express Z_G_2 as a double sum over pairs of
-     [cite_start]independent sets (I, J) such that I ∩ J = ∅[cite: 117, 493].
+     independent sets (I, J) such that I ∩ J = ∅[cite: 117, 493].
   2. PARTITION BY VERTEX w: Categorize pairs (I, J) into three exhaustive
-     [cite_start]cases based on the membership of vertex w[cite: 115, 494]:
+     cases based on the membership of vertex w[cite: 115, 494]:
      - Case 1 (Neither): w ∉ I and w ∉ J. This sum is equivalent to
        Z_G_2 on the reduced graph G \ {w}.
      - Case 2 (In I): w ∈ I (implies w ∉ J). Since I is independent,
@@ -51,7 +51,7 @@ lemma semiproper_poly_recurrence (v : V) (η μ : V → ℝ) (w : V) :
        v ∈ N(w) can be in J, equivalent to setting μ_v = 0 for all v ∈ N(w).
   3. FACTOR FUGACITIES: Pull the terms η_w and μ_w out of their
      respective summations to match the three terms of the recurrence
-     [cite_start]relation[cite: 115, 494].
+     relation[cite: 115, 494].
   -/
   sorry
 
@@ -77,27 +77,27 @@ theorem semiproper_multiaff_lower_bd (η μ : V → ℝ)
   /-
   USE THE FOLLOWING PROOF STRATEGY:
   1. INDUCTION SETUP:
-     - [cite_start]Proceed by induction on the vertex set size |V|[cite: 112, 490].
+     - Proceed by induction on the vertex set size |V|[cite: 112, 490].
      - Base Case (|V|=1): The inequality holds as an equality since the
-       [cite_start]product contains one term with d_v = 0, matching Z_K₁^{(2)}[cite: 112, 490].
+       product contains one term with d_v = 0, matching Z_K₁^{(2)}[cite: 112, 490].
      - Inductive Step: Assume the lower bound holds for all graphs
-       [cite_start]with |V|-1 vertices[cite: 112, 490].
+       with |V|-1 vertices[cite: 112, 490].
   2. VERTEX DELETION:
-     - [cite_start]Select a vertex w with maximum degree Δ = Δ(G)[cite: 113, 491].
-     - [cite_start]Apply semiproper_poly_recurrence to decompose Z_G_2(η, μ)[cite: 115, 494].
+     - Select a vertex w with maximum degree Δ = Δ(G)[cite: 113, 491].
+     - Apply semiproper_poly_recurrence to decompose Z_G_2(η, μ)[cite: 115, 494].
      - Apply the induction hypothesis to the three partition functions
-       [cite_start]on the subgraph G \ {w}[cite: 116, 496].
+       on the subgraph G \ {w}[cite: 116, 496].
   3. LOCAL REDUCTION:
-     - [cite_start]Cancel out shared product factors for all vertices v ∉ {w} ∪ N(w)[cite: 117, 507].
-     - [cite_start]Use definitions A_d(η, μ) = Z_{K_d}^{(2)}(η, μ) and B_d(η) = Z_{K_d}^{(1)}(η)[cite: 117, 512, 513].
-     - [cite_start]Reduce the problem to verifying the neighborhood inequality (3.2)[cite: 117, 511].
+     - Cancel out shared product factors for all vertices v ∉ {w} ∪ N(w)[cite: 117, 507].
+     - Use definitions A_d(η, μ) = Z_{K_d}^{(2)}(η, μ) and B_d(η) = Z_{K_d}^{(1)}(η)[cite: 117, 512, 513].
+     - Reduce the problem to verifying the neighborhood inequality (3.2)[cite: 117, 511].
   4. DUAL SET MEMBERSHIP:
      - Divide the inequality by the RHS product to show that the
-       [cite_start]resulting weight triple is in the dual set S_Δ[cite: 132, 544].
-     - [cite_start]Identify this triple as the one defined in Lemma 3.2 (lem_Sn_membership)[cite: 134, 546].
+       resulting weight triple is in the dual set S_Δ[cite: 132, 544].
+     - Identify this triple as the one defined in Lemma 3.2 (lem_Sn_membership)[cite: 134, 546].
   5. CONCLUSION:
      - Complete the inductive step by invoking Lemma 3.2, which proves
        membership via separate reduction (Lemma 3.3) and log-convexity
-       [cite_start]of the dual set (Lemma 3.4)[cite: 136, 550].
+       of the dual set (Lemma 3.4)[cite: 136, 550].
   -/
   sorry
