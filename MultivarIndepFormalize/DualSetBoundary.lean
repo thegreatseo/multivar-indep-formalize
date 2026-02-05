@@ -43,7 +43,7 @@ lemma f_poly_eq_h_aux_iff (Δ : ℕ) (s X : ℝ) (hX : 0 < X) :
       unfold f_poly h_aux;
       rw [ sub_div', div_eq_iff ] <;> first | positivity | ring;
       norm_num [ Real.rpow_add hX, Real.rpow_neg_one ] ; ring;
-      norm_cast ; simp +decide [ sq, mul_assoc, mul_comm, mul_left_comm, hX.ne' ];
+      norm_cast ; simp +decide [mul_assoc, mul_comm, mul_left_comm, hX.ne'];
       constructor <;> intro h <;> linear_combination h
 
 /-
@@ -182,7 +182,8 @@ lemma concave_gradient_inequality {E : Type*} [NormedAddCommGroup E] [NormedSpac
             have := hS ( show x ∈ S from interior_subset hx ) hu;
             convert this ( show 0 ≤ 1 - t by linarith ) ( show 0 ≤ t by linarith ) ( by linarith ) using 1 ; simp +decide [ sub_smul, smul_sub ] ; abel_nf;
           have := hf.2;
-          specialize this ( show x ∈ S from interior_subset hx ) hu ( show 0 ≤ 1 - t by linarith ) ( show 0 ≤ t by linarith ) ( by linarith ) ; simp_all +decide [ add_comm, smul_add, smul_sub ];
+          specialize this ( show x ∈ S from interior_subset hx ) hu ( show 0 ≤ 1 - t by linarith ) ( show 0 ≤ t by linarith ) ( by linarith ) ; simp_all +decide [add_comm,
+            smul_sub];
           convert this using 2 ; rw [ show x + ( t • u - t • x ) = t • u + ( 1 - t ) • x by rw [ sub_smul, one_smul ] ; abel1 ];
         -- By definition of the derivative, we know that
         have h_deriv : Filter.Tendsto (fun t : ℝ => (f (x + t • (u - x)) - f x) / t) (nhdsWithin 0 (Set.Ioi 0)) (nhds ((fderiv ℝ f x) (u - x))) := by
@@ -190,7 +191,7 @@ lemma concave_gradient_inequality {E : Type*} [NormedAddCommGroup E] [NormedSpac
             have h_deriv : HasFDerivAt (fun t : ℝ => f (x + t • (u - x))) (fderiv ℝ f x ∘L (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) (u - x))) 0 := by
               have h_chain : HasFDerivAt (fun t : ℝ => x + t • (u - x)) (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) (u - x)) 0 := by
                 rw [ hasFDerivAt_iff_tendsto ];
-                simp +decide [ norm_smul, mul_comm ]
+                simp +decide
               exact HasFDerivAt.comp 0 ( show HasFDerivAt f ( fderiv ℝ f x ) ( x + 0 • ( u - x ) ) from by simpa using hdiff.hasFDerivAt ) h_chain;
             simpa using h_deriv.hasDerivAt;
           simpa [ div_eq_inv_mul ] using h_deriv.tendsto_slope_zero_right;
@@ -412,10 +413,84 @@ lemma variational_upper_bound (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha�
     · exact hξ_unique _ ( xi_unique_zero Δ hΔ ( a₁ * a₂ ) hs₀ hs₁ |> Exists.choose_spec |> And.left |> And.left ) ( xi_unique_zero Δ hΔ ( a₁ * a₂ ) hs₀ hs₁ |> Exists.choose_spec |> And.left |> And.right ) ▸ rfl;
   linarith
 
-/--
+/-
 In the symmetric case a₁ = a₂, the maximum is attained at x_* = y_* > 0.
 Matches page 9.
 -/
+noncomputable section AristotleLemmas
+
+lemma xi_bound_helper (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) :
+    s * (xi_Δ Δ hΔ s hs₀ hs₁) ^ (2 * Δ) > 1 := by
+      -- By definition of $xi_Δ$, we know that $(Δ + 1) * s * (xi_Δ Δ hΔ s hs₀ hs₁) ^ (2 * Δ) = Δ * (xi_Δ Δ hΔ s hs₀ hs₁) ^ (Δ + 1) + 1$.
+      have h_eq : (Δ + 1) * s * (xi_Δ Δ hΔ s hs₀ hs₁) ^ (2 * Δ) = Δ * (xi_Δ Δ hΔ s hs₀ hs₁) ^ (Δ + 1) + 1 := by
+        have := Exists.choose_spec ( xi_unique_zero Δ hΔ s hs₀ hs₁ );
+        unfold xi_Δ f_poly at *;
+        norm_cast at *; linarith [ this.1.2 ] ;
+      -- Since ξ > 1 (by definition of xi_Δ) and Δ ≥ 2, we have ξ^{Δ+1} > 1, so Δ ξ^{Δ+1} + 1 > Δ + 1.
+      have h_ineq : (xi_Δ Δ hΔ s hs₀ hs₁) ^ (Δ + 1) > 1 := by
+        have h_ineq : 1 < xi_Δ Δ hΔ s hs₀ hs₁ := by
+          exact Classical.choose_spec ( xi_unique_zero Δ hΔ s hs₀ hs₁ ) |>.1 |>.1;
+        exact one_lt_pow₀ h_ineq ( by positivity );
+      nlinarith [ ( by norm_cast : ( 2 : ℝ ) ≤ Δ ) ]
+
+lemma symmetric_critical_point_pos (Δ : ℕ) (hΔ : 2 ≤ Δ) (a : ℝ) (ha₀ : 0 < a) (ha₁ : a < 1) :
+    let s := a * a
+    let hs₀ : 0 < s := by aesop
+    let hs₁ : s < 1 := by nlinarith
+    let ξ := xi_Δ Δ hΔ s hs₀ hs₁
+    let x_star := (a * ξ ^ Δ - 1) / Δ
+    x_star > 0 := by
+      -- By definition of $\xi$, we have $\xi > 1$ because $s = a^2 < 1$.
+      have hξ_pos : 1 < xi_Δ Δ hΔ (a * a) (mul_pos ha₀ ha₀) (by nlinarith) := by
+        exact ( xi_unique_zero Δ hΔ ( a * a ) ( mul_pos ha₀ ha₀ ) ( by nlinarith ) ) |>.choose_spec.1.1;
+      refine' div_pos _ ( by positivity );
+      have := xi_bound_helper Δ hΔ ( a * a ) ( mul_pos ha₀ ha₀ ) ( by nlinarith );
+      rw [ pow_mul' ] at this ; nlinarith [ show 0 < a * xi_Δ Δ hΔ ( a * a ) ( mul_pos ha₀ ha₀ ) ( by nlinarith ) ^ Δ by positivity ]
+
+lemma symmetric_value_at_critical (Δ : ℕ) (hΔ : 2 ≤ Δ) (a : ℝ) (ha₀ : 0 < a) (ha₁ : a < 1) :
+    let s := a * a
+    let hs₀ : 0 < s := by aesop
+    let hs₁ : s < 1 := by nlinarith
+    let ξ := xi_Δ Δ hΔ s hs₀ hs₁
+    let x_star := (a * ξ ^ Δ - 1) / Δ
+    A_d (Δ + 1) x_star x_star ^ (1 / (Δ + 1 : ℝ)) - a * x_star - a * x_star =
+      Psi_Delta Δ hΔ s hs₀ hs₁ + (2 * a) / Δ := by
+        have := xi_unique_zero Δ hΔ ( a * a ) ( by positivity ) ( by nlinarith );
+        obtain ⟨ ξ, hξ₁, hξ₂ ⟩ := this;
+        have := hξ₂ ( xi_Δ Δ hΔ ( a * a ) ( by positivity ) ( by nlinarith ) ) ⟨ ?_, ?_ ⟩ <;> norm_num [ f_poly ] at *;
+        · field_simp;
+          rw [ show A_d ( Δ + 1 ) ( ( a * xi_Δ Δ hΔ ( a ^ 2 ) ( by positivity ) ( by nlinarith ) ^ Δ - 1 ) / Δ ) ( ( a * xi_Δ Δ hΔ ( a ^ 2 ) ( by positivity ) ( by nlinarith ) ^ Δ - 1 ) / Δ ) = ξ ^ ( Δ + 1 ) from ?_ ];
+          · rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by linarith ) ] ; norm_num [ Nat.cast_add_one_ne_zero ] ; ring;
+            unfold Psi_Delta; norm_num [ this ] ; ring;
+            rw [ show xi_Δ Δ hΔ ( a ^ 2 ) ( by positivity ) ( by nlinarith ) = ξ by simpa only [ sq ] using this ] ; nlinarith [ mul_inv_cancel_left₀ ( by positivity : ( Δ : ℝ ) ≠ 0 ) ( a ^ 2 * ξ ^ Δ ) ];
+          · convert critical_point_in_Ω Δ hΔ a a ha₀ ha₀ ξ hξ₁.1 _ |> And.right using 1;
+            · norm_num [ ← this, sq ];
+            · exact_mod_cast hξ₁.2;
+        · exact Classical.choose_spec ( xi_unique_zero Δ hΔ ( a * a ) ( by positivity ) ( by nlinarith ) ) |>.1.1;
+        · convert Classical.choose_spec ( xi_unique_zero Δ hΔ ( a * a ) ( by positivity ) ( by nlinarith ) ) |>.1.2 using 1
+
+lemma symmetric_pointwise_upper_bound (Δ : ℕ) (hΔ : 2 ≤ Δ) (a : ℝ) (ha₀ : 0 < a) (ha₁ : a < 1) :
+    let s := a * a
+    let hs₀ : 0 < s := by aesop
+    let hs₁ : s < 1 := by nlinarith
+    ∀ x y, x ≥ 0 → y ≥ 0 → A_d (Δ + 1) x y ^ (1 / (Δ + 1 : ℝ)) - a * x - a * y ≤
+      Psi_Delta Δ hΔ s hs₀ hs₁ + (2 * a) / Δ := by
+        -- By definition of $xi$, we know that $xi$ is the unique zero of $f_poly$ in $(1, \infty)$.
+        have h_xi : ∃ x_star : ℝ, x_star > 1 ∧ f_poly Δ (a * a) x_star = 0 ∧ A_d (Δ + 1) ((a * x_star ^ Δ - 1) / Δ) ((a * x_star ^ Δ - 1) / Δ) = x_star ^ (Δ + 1) := by
+          obtain ⟨x_star, hx_star⟩ : ∃ x_star : ℝ, x_star > 1 ∧ f_poly Δ (a * a) x_star = 0 := by
+            exact ExistsUnique.exists ( xi_unique_zero Δ hΔ ( a * a ) ( mul_pos ha₀ ha₀ ) ( by nlinarith ) );
+          exact ⟨ x_star, hx_star.1, hx_star.2, by
+            unfold A_d f_poly at *;
+            norm_cast at *;
+            simp_all +decide [ Int.subNatNat_eq_coe ];
+            field_simp;
+            ring_nf at * ; linarith ⟩;
+        obtain ⟨x_star, hx_star_gt1, hx_star_root, hx_star_A⟩ := h_xi;
+        convert variational_upper_bound Δ hΔ a a ha₀ ha₀ ( by nlinarith ) ( ( a * x_star ^ Δ - 1 ) / Δ ) ( ( a * x_star ^ Δ - 1 ) / Δ ) x_star hx_star_A using 1;
+        grind
+
+end AristotleLemmas
+
 lemma symmetric_equality (Δ : ℕ) (hΔ : 2 ≤ Δ) (a : ℝ) (ha₀ : 0 < a) (ha₁ : a < 1) :
     let s := a * a
     let hs₀ : 0 < s := by aesop
@@ -454,17 +529,16 @@ lemma symmetric_equality (Δ : ℕ) (hΔ : 2 ≤ Δ) (a : ℝ) (ha₀ : 0 < a) (
   refine' ⟨ _, le_antisymm _ _ ⟩
   all_goals generalize_proofs at *;
   · convert symmetric_critical_point_pos Δ hΔ a ha₀ ha₁ using 1;
-  · convert symmetric_pointwise_upper_bound Δ hΔ a ha₀ ha₁ |> fun h => ciSup_le fun x => ?_ using 1
-    generalize_proofs at *;
-    · by_cases hx : 0 ≤ x <;> simp_all +decide [ ciSup_eq_ite ];
-      · refine' ciSup_le fun y => _;
-        split_ifs <;> [ linarith [ h x y hx ( by linarith ) ] ; linarith [ show 0 ≤ Psi_Delta Δ hΔ ( a * a ) ‹_› ‹_› + 2 * a / Δ from by
-                                                                            specialize h 0 0 ; norm_num at h;
-                                                                            exact le_trans ( Real.rpow_nonneg ( by unfold A_d; norm_num ) _ ) h ] ];
-      · rw [ if_neg hx.not_le ];
-        have := h 0 0 le_rfl le_rfl; norm_num [ A_d ] at this;
-        linarith;
-    · exact fun _ => ⟨ 0 ⟩;
+  · have h := symmetric_pointwise_upper_bound Δ hΔ a ha₀ ha₁;
+    refine' ciSup_le fun x => ?_;
+    by_cases hx : 0 ≤ x <;> simp_all +decide [ ciSup_eq_ite ];
+    · refine' ciSup_le fun y => _;
+      split_ifs <;> [ linarith [ h x y hx ( by linarith ) ] ; linarith [ show 0 ≤ Psi_Delta Δ hΔ ( a * a ) (by positivity) (by nlinarith) + 2 * a / Δ from by
+                                                                          specialize h 0 0 ; norm_num at h;
+                                                                          exact le_trans ( Real.rpow_nonneg ( by unfold A_d; norm_num ) _ ) h ] ];
+    · rw [ if_neg (not_le.mpr hx) ];
+      have := h 0 0 le_rfl le_rfl; norm_num [ A_d ] at this;
+      linarith;
   · -- Let's choose any $x, y \geq 0$ and show that $f(x, y) \leq C$.
     have h_le_C : ∀ x y : ℝ, x ≥ 0 → y ≥ 0 → (A_d (Δ + 1) x y) ^ (1 / (Δ + 1 : ℝ)) - a * x - a * y ≤ Psi_Delta Δ hΔ (a * a) (by linarith) (by linarith) + 2 * a / (Δ : ℝ) := by
       convert symmetric_pointwise_upper_bound Δ hΔ a ha₀ ha₁ using 1;
