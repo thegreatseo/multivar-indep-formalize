@@ -18,9 +18,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-/-
-The set of all independent sets of a graph G.
--/
 open SimpleGraph Finset BigOperators Real
 
 variable {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]

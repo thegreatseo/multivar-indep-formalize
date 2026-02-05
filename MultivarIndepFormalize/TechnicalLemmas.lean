@@ -166,7 +166,7 @@ lemma basic_ineq (d : ℕ) (hd : d ≥ 1) (x y : ℝ) (hx : x ≥ 0) (hy : y ≥
         · norm_cast;
           refine' ne_of_lt ( lt_of_lt_of_le _ ( pow_le_pow_right₀ ( by nlinarith [ show ( 0 : ℝ ) < y by positivity ] ) ( show 2 * ( d + 1 + 1 ) ≥ d + 1 + 1 + 1 by linarith ) ) );
           gcongr ; norm_num;
-      · by_cases hy0 : y = 0 <;> simp_all +decide [ Real.rpow_add, Real.rpow_mul ];
+      · by_cases hy0 : y = 0 <;> simp_all +decide [Real.rpow_add];
         · norm_cast ; norm_num [ pow_mul' ];
           rw [ ← pow_mul' ];
           refine' ne_of_lt ( lt_of_lt_of_le _ ( pow_le_pow_right₀ ( by nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast ] ) ( show d + 1 ≤ 2 * d by linarith ) ) );

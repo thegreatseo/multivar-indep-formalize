@@ -1,5 +1,5 @@
 /-
-**Lemma 3.2** `lem:Sn-membership`
+**Lemma 3.2** `lem:Sn-membership` SΔ_membership
 "Something" is in S_Δ.
 
 In the statements and proofs, replace every \lambda to \eta.

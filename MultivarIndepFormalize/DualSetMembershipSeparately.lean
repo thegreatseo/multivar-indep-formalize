@@ -223,7 +223,7 @@ lemma H_d_plus_one_ge_s_pow_d_plus_one (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 
     rw [ div_mul_eq_mul_div, div_mul_eq_mul_div, div_le_iff₀ ] <;> try nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast ];
     have h_num_nonneg : numerator_diff d s x ≥ 0 := by
       convert Num_poly_nonneg d hd s hs x hx using 1;
-      exact?;
+      exact Eq.symm (Num_poly_eq_numerator_diff d s x);
     unfold numerator_diff at h_num_nonneg; linarith;
 
 lemma H_d_plus_one_ge_s_pow_d_plus_one_aux (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (x : ℝ) (hx : x ≥ s - 1)
