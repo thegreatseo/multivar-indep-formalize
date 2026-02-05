@@ -42,7 +42,7 @@ lemma f_poly_eq_h_aux_iff (Δ : ℕ) (s X : ℝ) (hX : 0 < X) :
 
 /-
 h(X) is strictly increasing on (0, ∞) because it is the difference of an increasing function and a decreasing function (or sum of two increasing functions).
-The first term (Δ+1)s X^(Δ-1) is increasing because Δ ≥ 2 implies Δ-1 > 0.
+The first term (Δ+1)s X^(Δ-1) is increasing because 2 ≤ Δ implies Δ-1 > 0.
 The second term -1/X^(Δ+1) is increasing because 1/X^(Δ+1) is decreasing (exponent Δ+1 > 0).
 -/
 lemma h_aux_strict_mono (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs : 0 < s) :
@@ -88,7 +88,7 @@ For \(0< s <1\), $f(X)$ has a unique zero \(\xi_\Delta (s)\) on \((1,\infty)\).
 
 f(X) is f_poly and defined as (Δ+1)a_1a_2 X^{2Δ} - Δ X^{Δ+1} - 1
 -/
-lemma xi_unique_zero (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) :
+lemma xi_unique_zero (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) :
     ∃! X : ℝ, X > 1 ∧ f_poly Δ s X = 0 := by
   -- By `f_poly_eq_h_aux_iff`, for X > 0, f_poly(X) = 0 is equivalent to h_aux(X) = Δ.
   have h_unique : ∃! X : ℝ, X > 1 ∧ h_aux Δ s X = Δ := by
@@ -113,17 +113,74 @@ lemma xi_unique_zero (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs₀ : 0 < s) (hs�
 /--
 The unique zero ξ_Δ(s) of f(X) = (Δ+1)sX^{2Δ} - ΔX^{Δ+1} - 1 on (1, ∞).
 -/
-def xi_Δ (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) : ℝ :=
+def xi_Δ (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) : ℝ :=
   (xi_unique_zero Δ hΔ s hs₀ hs₁).choose
 
 /--
 The auxiliary function Ψ_Δ(s) = ξ_Δ(s) - (2/Δ) * s * ξ_Δ(s)^Δ.
 Matches source definition.
 -/
-def Psi_Delta (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) : ℝ :=
+def Psi_Delta (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s < 1) : ℝ :=
   let ξ := xi_Δ Δ hΔ s hs₀ hs₁
   ξ - (2 / (Δ : ℝ)) * s * ξ ^ (Δ : ℝ)
 
+
+/--
+The critical point (x_*, y_*) defined in (3.8) satisfies A_{Δ+1}(x_*, y_*) = ξ^{Δ+1}
+and lies within the convex domain Ω. Matches page 9.
+-/
+lemma critical_point_in_Ω (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha₁ : 0 < a₁) (ha₂ : 0 < a₂)
+    (ξ : ℝ) (hξ : 1 < ξ) (h_root : (Δ + 1 : ℝ) * (a₁ * a₂) * ξ ^ (2 * Δ) - Δ * ξ ^ (Δ + 1) - 1 = 0) :
+    let x_star := (a₂ * ξ ^ Δ - 1) / Δ
+    let y_star := (a₁ * ξ ^ Δ - 1) / Δ
+    let Ω := {p : ℝ × ℝ | A_d (Δ + 1) p.1 p.2 > 0 ∧ p.2 > -1 / Δ}
+    (x_star, y_star) ∈ Ω ∧ A_d (Δ + 1) x_star y_star = ξ ^ (Δ + 1) := by
+  /-
+  PROOF STRATEGY:
+  1. Substitute x_star and y_star into the definition of A_{Δ+1}(x,y).
+  2. Simplify the expression using the characteristic root identity h_root. [cite: 173, 604]
+  3. Prove (x_star, y_star) ∈ Ω by showing y_star > -1/Δ (from ξ > 1) and A_{Δ+1} > 0.
+  -/
+  sorry
+
+/--
+The value at the critical point provides an upper bound for the variation of A_{Δ+1}^{1/(Δ+1)}.
+Matches page 9, Equation 3.7.
+-/
+lemma variational_upper_bound (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha₁ : a₁ > 0) (ha₂ : a₂ > 0) (ha₁a₂ : a₁ * a₂ < 1)
+    (x_star y_star : ℝ) (ξ : ℝ) (h_A : A_d (Δ + 1) x_star y_star = ξ ^ (Δ + 1)) :
+    let s := a₁ * a₂
+    let hs₀ : 0 < s := by aesop
+    let hs₁ : s < 1 := ha₁a₂
+    (∀ x y, x ≥ 0 → y ≥ 0 → A_d (Δ + 1) x y ^ (1 / (Δ + 1 : ℝ)) - a₁ * x - a₂ * y ≤
+      Psi_Delta Δ hΔ s hs₀ hs₁ + (a₁ + a₂) / Δ) := by
+  /-
+  PROOF STRATEGY:
+  1. Invoke Lemma 3.1: A_{Δ+1}^{1/(Δ+1)} is concave on the convex set Ω. [cite: 126, 531, 543]
+  2. Show that at (x_star, y_star), the partial derivatives match a₁ and a₂. [cite: 165, 595, 597]
+  3. Conclude the tangent plane bound: f(x,y) ≤ f(x_*, y_*) + ∇f(x_*, y_*) · (x-x_*, y-y_*).
+  4. Use algebra to simplify this to the definition of Psi_Delta. [cite: 181, 613]
+  -/
+  sorry
+
+/--
+In the symmetric case a₁ = a₂, the maximum is attained at x_* = y_* > 0.
+Matches page 9.
+-/
+lemma symmetric_equality (Δ : ℕ) (hΔ : 2 ≤ Δ) (a : ℝ) (ha₀ : 0 < a) (ha₁ : a < 1) :
+    let s := a * a
+    let hs₀ : 0 < s := by aesop
+    let hs₁ : s < 1 := by nlinarith
+    let ξ := xi_Δ Δ hΔ s hs₀ hs₁
+    let x_star := (a * ξ ^ Δ - 1) / Δ
+    x_star > 0 ∧ Φ_Δ Δ a a = Psi_Delta Δ hΔ s hs₀ hs₁ + (2 * a) / Δ := by
+  /-
+  PROOF STRATEGY:
+  1. Use a * ξ^Δ > 1 (from root property) to prove x_star = y_star > 0. [cite: 183, 615]
+  2. Since the critical point is in the interior of (ℝ≥0)², the supremum is attained here.
+  3. Verify the equality matches the target expression.
+  -/
+  sorry
 
 /--
 **Lemma 3.5** `lem:Phi-upper-bound`
@@ -139,7 +196,7 @@ Moreover, if \(a_1=a_2\), then equality holds.
 
 Ψ_Δ is explicitly defined in Psi_Delta.
 -/
-lemma Phi_upper_bound (Δ : ℕ) (hΔ : Δ ≥ 2) (a₁ a₂ : ℝ)
+lemma Phi_upper_bound (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ)
     (ha₁ : a₁ > 0) (ha₂ : a₂ > 0) (h_prod : a₁ * a₂ < 1) :
     let s := a₁ * a₂
     let hs₀ : 0 < s := by simpa [s] using (mul_pos ha₁ ha₂)
@@ -149,36 +206,31 @@ lemma Phi_upper_bound (Δ : ℕ) (hΔ : Δ ≥ 2) (a₁ a₂ : ℝ)
     Φ_Δ Δ a₁ a₂ ≤ Ψ_Δ_s + (a₁ + a₂) / (Δ : ℝ) ∧
     (a₁ = a₂ → Φ_Δ Δ a₁ a₂ = Ψ_Δ_s + (a₁ + a₂) / (Δ : ℝ)) := by
   /-
-  USE THE FOLLOWING PROOF STRATEGY:
-  1. VARIATIONAL DEFINITION:
-     - Recall Φ_Δ(a₁, a₂) = sup_{x,y ≥ 0} (A_{Δ+1}(x,y)^{1/(Δ+1)} - a₁x - a₂y)[cite: 588].
-     - This supremum is attained at the critical point (x_*, y_*) where the partial
-       derivatives of A_{Δ+1}^{1/(Δ+1)} match a₁ and a₂[cite: 165].
+  USE THE FOLLOWING MODULAR PROOF STRATEGY:
 
-  2. IDENTIFY CRITICAL POINT (x_*, y_*):
-     - Let ξ := A_{Δ+1}(x_*, y_*)^{1/(Δ+1)}.
-     - The first-order conditions imply:
-       a₁ = (1 + Δy_*)ξ⁻ᵈ and a₂ = (1 + Δx_*)ξ⁻ᵈ[cite: 166, 598].
-     - Substituting these into the identity (Δ+1)(Δx+1)(Δy+1) = ΔA_{Δ+1} + 1
-       shows that ξ must be the unique zero of the polynomial:
-       f(X) = (Δ+1)a₁a₂X^{2Δ} - ΔX^{Δ+1} - 1[cite: 167, 598].
+  1. ROOT IDENTIFICATION:
+     - Let ξ := xi_Δ Δ hΔ s hs₀ hs₁. Use xi_unique_zero to establish that ξ is
+       the unique root in (1, ∞) for the characteristic polynomial[cite: 169, 600].
+     - This root identity (Δ + 1) * s * ξ^(2Δ) - Δ * ξ^(Δ+1) - 1 = 0 will be
+       central to all subsequent algebraic simplifications[cite: 167, 598].
 
-  3. USE THE PSI_DELTA AUXILIARY FUNCTION:
-     - By Claim 3.6, f(X) has a unique zero ξ_Δ(s) > 1 for 0 < s < 1[cite: 169, 600].
-     - Solve for x_* and y_* in terms of ξ_Δ(s):
-       x_* = (a₂ * ξ_Δ(s)^Δ - 1) / Δ and y_* = (a₁ * ξ_Δ(s)^Δ - 1) / Δ[cite: 174, 605].
+  2. CRITICAL POINT MAPPING:
+     - Define the potential maximum (x_star, y_star) using Equation 3.8[cite: 174, 605].
+     - Invoke 'critical_point_in_Ω' to prove that this point satisfies the partition
+       function identity A_{Δ+1}(x_star, y_star) = ξ^{Δ+1} and resides within the
+       geometrically safe convex domain Ω[cite: 177, 607].
 
-  4. DOMAIN EXTENSION & CONCAVITY:
-     - Define the convex set Ω := {(x,y) : A_{Δ+1}(x,y) > 0, y > -1/Δ}[cite: 177, 607].
-     - Since A_{Δ+1}^{1/(Δ+1)} is concave on Ω (Lemma 3.1), the value at the critical
-       point (x_*, y_*) provides a global upper bound for the supremum[cite: 180, 611].
-     - Substitution yields:
-       Φ_Δ ≤ ξ_Δ(s) - (2/Δ)s * ξ_Δ(s)^Δ + (a₁ + a₂)/Δ.
-     - The first term is exactly the definition of Ψ_Δ(s)[cite: 181, 613].
+  3. ESTABLISHING THE UPPER BOUND:
+     - Apply 'variational_upper_bound'. This lemma uses the concavity of A_{Δ+1}^{1/(Δ+1)}
+       (Lemma 3.1) to show the tangent plane at (x_star, y_star) bounds the
+       partition function variation across the entire nonnegative quadrant[cite: 180, 611].
+     - The algebraic conclusion of this bound matches the first term of our
+       goal: Ψ_Δ(s) + (a₁ + a₂)/Δ[cite: 181, 613].
 
-  5. SYMMETRIC CASE (a₁ = a₂):
-     - If a₁ = a₂ = √s, then x_* = y_* > 0 because a₁ * ξ_Δ(s)^Δ > 1[cite: 183, 615].
-     - Since (x_*, y_*) lies in the interior of the nonnegative quadrant,
-       the supremum is exactly attained at this point, resulting in equality[cite: 184, 616].
+  4. SYMMETRIC EQUALITY CASE:
+     - For the condition a₁ = a₂, invoke 'symmetric_equality'[cite: 184, 616].
+     - This confirms that x_star = y_star > 0, meaning the critical point is
+       in the interior of the domain, ensuring the supremum is exactly
+       the value computed at (x_star, y_star)[cite: 183, 615].
   -/
   sorry
