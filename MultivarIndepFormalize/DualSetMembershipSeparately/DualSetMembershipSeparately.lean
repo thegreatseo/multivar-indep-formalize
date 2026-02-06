@@ -12,6 +12,8 @@ open scoped Nat
 open scoped Classical
 open scoped Pointwise
 
+open Real (exp log sqrt)
+
 set_option maxHeartbeats 0
 set_option maxRecDepth 4000
 set_option synthInstance.maxHeartbeats 20000
@@ -49,8 +51,8 @@ lemma deriv_weight_difference (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d)
       let Bu := K * exp u
       let Cu := K * exp (-u)
       let Au := ((d - 1) * K ^ 2 + Bu + Cu - 1) / d
-      (Au ^ p - (Bu ^ p + Cu ^ p) / Δ) * D ^ (-Δ / (d + 1))
-    HasDerivAt f (d⁻¹ * (p * (B - C) * A ^ (p - 1) - (B ^ p - C ^ p)) * D ^ (-Δ / (d + 1))) t := by
+      (Au ^ p - (Bu ^ p + Cu ^ p) / Δ) * D ^ (-(Δ : ℝ) / (d + 1))
+    HasDerivAt f ((d : ℝ)⁻¹ * (p * (B - C) * A ^ (p - 1) - (B ^ p - C ^ p)) * D ^ (- (Δ : ℝ) / (d + 1))) t := by
   /-
   PROOF STRATEGY:
   1. Use 'HasDerivAt' rules for exponentials and powers.
@@ -90,7 +92,7 @@ lemma B_d_K_to_η (d : ℕ) (hd : 1 ≤ d) (K : ℝ) :
 
 lemma A_d_K_to_η (d : ℕ) (hd : 1 ≤ d) (K : ℝ) :
     A_d d (K_to_η d K) (K_to_η d K) = ((d - 1) * K ^ 2 + 2 * K - 1) / d := by
-  unfold A_d K_to_η [cite: 117, 512]
+  unfold A_d K_to_η
   field_simp
   ring
 
@@ -146,14 +148,14 @@ lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 
     (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
     let w := weight_triple Δ d η μ
     let K := (B_d d η * B_d d μ).sqrt
-    let w_sym := weight_triple Δ d (K_to_η K) (K_to_η K)
-    w.0 - Φ_Δ Δ w.1 w.2 ≥ w_sym.0 - Φ_Δ Δ w_sym.1 w_sym.2 := by
+    let w_sym := weight_triple Δ d (K_to_η d K) (K_to_η d K)
+    w.1 - Φ_Δ Δ w.2.1 w.2.2 ≥ w_sym.1 - Φ_Δ Δ w_sym.2.1 w_sym.2.2 := by
   /-
   USE THE FOLLOWING MODULAR PROOF STRATEGY:
 
   1. GEOMETRIC MEAN INVARIANT:
      - Let B := B_d d μ and C := B_d d η. Fix the product BC = K²[cite: 198, 647].
-     - Note that w.1 * w.2 depends only on K, so the product of the weights
+     - Note that w.2.1 * w.2.2 depends only on K, so the product of the weights
        is invariant under the transformation Keᵗ and Ke⁻ᵗ.
 
   2. GAP ANALYSIS VIA DERIVATIVES:
@@ -165,9 +167,9 @@ lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 
 
   3. BOUNDARY REDUCTION VIA LEMMA 3.5:
      - Use 'Phi_upper_bound' (Lemma 3.5) to bound the dual function Φ_Δ:
-       Φ_Δ Δ w.1 w.2 ≤ Ψ_Δ Δ (w.1 * w.2) + (w.1 + w.2) / Δ[cite: 196, 645].
+       Φ_Δ Δ w.2.1 w.2.2 ≤ Ψ_Δ Δ (w.2.1 * w.2.2) + (w.2.1 + w.2.2) / Δ[cite: 196, 645].
      - This implies the inequality:
-       w.0 - Φ_Δ Δ w.1 w.2 ≥ w.0 - (w.1 + w.2) / Δ - Ψ_Δ Δ (w.1 * w.2)[cite: 205, 656].
+       w.1 - Φ_Δ Δ w.2.1 w.2.2 ≥ w.1 - (w.2.1 + w.2.2) / Δ - Ψ_Δ Δ (w.2.1 * w.2.2)[cite: 205, 656].
 
   4. SYMMETRIC MATCHING:
      - Invoke 'dual_gap_minimized_at_symmetry' to show the RHS is exactly

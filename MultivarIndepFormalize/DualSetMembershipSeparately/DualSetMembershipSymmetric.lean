@@ -23,12 +23,16 @@ noncomputable section
 
 -- Part A: The technical derivative of the scaling function
 /--
-The implicit derivative of the zero-finding function x_k(s).
+The implicit derivative of the zero-finding function x_k(s) for s > 1.
 Matches equation (3.14) on page 11.
 -/
-lemma deriv_x_k (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 ≤ s) (hks : k = 1 → s < 2) :
-    let x := x_k k hk s hs hks
-    HasDerivAt (λ u => x_k k hk u hs hks)
+lemma deriv_x_k (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 → s < 2) :
+    let x_ext : ℝ → ℝ := fun t => if ht : (1 ≤ t) ∧ (k = 1 → t < 2) then
+        x_k k hk t ht.1 ht.2
+      else
+        0
+    let x := x_ext s
+    HasDerivAt x_ext
       (s ^ (k - 1) * B_d k x / (2 * (k - 1) * x + 2 - s ^ k)) s := by
   /-
   PROOF STRATEGY:
@@ -42,13 +46,17 @@ lemma deriv_x_k (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 ≤ s) (hks : k = 1 �
   sorry
 
 /--
-The derivative of log R_k(s) with respect to s for s ≥ 1.
+The derivative of log R_k(s) with respect to s for s > 1.
 Matches equation (3.15) on page 11 of the paper:
 ∂_s log R_k(s) = -s^(k-1) / (s^k + 2x_k(s)).
 -/
-lemma log_Rk_diff (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 ≤ s) (hks : k = 1 → s < 2) :
-    let x := x_k k hk s hs hks
-    HasDerivAt (λ u => log (R_k k hk u hs hks))
+lemma log_Rk_diff (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 → s < 2) :
+    let log_Rk_ext : ℝ → ℝ := fun t => if ht: (1 ≤ t) ∧ (k = 1 → t < 2) then
+        Real.log (R_k k hk t ht.1 ht.2)
+      else
+        0
+    let x := x_k k hk s hs.le hks
+    HasDerivAt log_Rk_ext
       (-s ^ (k - 1) / (s ^ k + 2 * x)) s := by
   /-
   PROOF STRATEGY:
@@ -89,10 +97,11 @@ lemma R_k_monotonicity (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (hds : 
     R_k (d + 1) (by linarith) s hs (by intro h; linarith) ≤ R_k d hd s hs hds := by
   /-
   PROOF STRATEGY:
-  1. Use log_Rk_diff (Part A): ∂_s log R_k(s) = -s^(k-1) / (s^k + 2x_k(s)).
-  2. Use x_k_comparison (Part B): x_{d+1}(s) ≤ s * x_d(s).
-  3. Combine these to show ∂_s log R_{d+1}(s) ≤ ∂_s log R_d(s).
-  4. Since R_{d+1}(1) = R_d(1) = 1 (at x=0), integration/monotonicity
+  1. Compute R_k(1) = 1 for all k ≥ 1.
+  2. Use log_Rk_diff (Part A): ∂_s log R_k(s) = -s^(k-1) / (s^k + 2x_k(s)).
+  3. Use x_k_comparison (Part B): x_{d+1}(s) ≤ s * x_d(s).
+  4. Combine these to show ∂_s log R_{d+1}(s) ≤ ∂_s log R_d(s).
+  5. Since R_{d+1}(1) = R_d(1) = 1 (at x=0), integration/monotonicity
      implies R_{d+1}(s) ≤ R_d(s) for all s ≥ 1.
   -/
   sorry
