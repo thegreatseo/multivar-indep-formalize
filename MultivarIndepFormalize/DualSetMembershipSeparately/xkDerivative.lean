@@ -66,7 +66,7 @@ x_k_ext is a local right inverse of H_k^(1/k).
 lemma x_k_ext_is_inverse (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 → s < 2) :
     ∀ᶠ t in nhds s, (H_k k (x_k_ext k hk t)) ^ (1 / (k : ℝ)) = t := by
   have h_neighborhood : ∀ᶠ t in nhds s, 1 ≤ t ∧ (k = 1 → t < 2) := by
-    by_cases hk1 : k = 1 <;> simp_all +decide [ Filter.eventually_inf_principal ];
+    by_cases hk1 : k = 1 <;> simp_all +decide;
     · exact ⟨ Ici_mem_nhds hs, Iio_mem_nhds hks ⟩;
     · exact Ici_mem_nhds hs;
   filter_upwards [ h_neighborhood ] with t ht using by rw [ show x_k_ext k hk t = x_k k hk t ht.1 ht.2 from by unfold x_k_ext; aesop ] ; exact ( x_k_spec k hk t ht.1 ht.2 ) |>.2;
@@ -238,7 +238,7 @@ lemma deriv_x_k (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 →
         convert f_k_hasDerivAt k hk x hx using 1;
       have := @HasDerivAt.of_local_left_inverse;
       convert this ( show ContinuousAt x_ext s from ?_ ) h_inv_deriv ?_ ?_ using 1;
-      · exact?;
+      · simp only [one_div, mul_inv_rev, inv_div, inv_inv]
       · convert x_k_ext_continuousAt k hk s hs hks using 1;
       · simp +zetaDelta at *;
         refine' ⟨ ⟨ by linarith, _ ⟩, ⟨ by linarith, _ ⟩, _ ⟩;
@@ -249,7 +249,7 @@ lemma deriv_x_k (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 →
       · convert x_k_ext_is_inverse k hk s hs hks using 1;
     convert hx_deriv using 1;
     convert deriv_x_k_algebraic_identity k hk x s hx ( by linarith ) hx_s |> Eq.symm using 1;
-    rcases k with ( _ | k ) <;> simp_all +decide [ Nat.succ_div ];
+    rcases k with ( _ | k ) <;> simp_all +decide;
     rw [ ← Real.rpow_natCast _ ( k + 1 ), ← Real.rpow_mul ( by positivity ) ] ; norm_num [ Nat.cast_add_one_ne_zero ] ; ring;
     rw [ show ( -1 - ( k : ℝ ) + ( k : ℝ ) * ( 1 + ( k : ℝ ) ) ⁻¹ + ( 1 + ( k : ℝ ) ) ⁻¹ ) = -k by nlinarith [ mul_inv_cancel₀ ( by linarith : ( 1 + ( k : ℝ ) ) ≠ 0 ) ] ] ; norm_num [ Real.rpow_neg ( by positivity : 0 ≤ s ) ] ; ring;
     -- Combine like terms and simplify the expression.

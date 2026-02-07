@@ -191,7 +191,7 @@ lemma log_Rk_diff (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 �
   apply_rules [ HasDerivAt.congr_of_eventuallyEq ];
   convert HasDerivAt.comp s ( helper_deriv_log_Rk_x k hk _ _ ) ( deriv_x_k k hk s hs hks ) using 1;
   any_goals tauto;
-  · split_ifs <;> simp_all +decide [ ne_of_gt, le_of_lt ];
+  · split_ifs <;> simp_all +decide [le_of_lt];
     convert Eq.symm ( helper_product_derivs k hk s hs ( x_k k hk s hs.le hks ) ( x_k_spec k hk s hs.le hks |>.1 ) ( helper_Hk_eq_sk k hk s hs.le hks ) hks ) using 1;
     ring;
   · split_ifs <;> [ exact x_k_spec _ _ _ _ _ |>.1; exact le_rfl ];
