@@ -164,15 +164,15 @@ Also, f(x,y)|_{x=z} means f(z,y), i.e., the value of f(x,y) where x is substitut
 -/
 open scoped Classical in
 lemma semiproper_poly_recurrence (η μ : V → ℝ) (w : V) :
-    let G_minus_v := G.induce {x | x ≠ w}
+    let G_minus_w := G.induce {x | x ≠ w}
     let η_rest := η ∘ (↑) -- η restricted to V \ {w}
     let μ_rest := μ ∘ (↑) -- μ restricted to V \ {w}
     let η_sub := (fun v => if G.Adj w v then 0 else η v) ∘ (↑) -- Substitution η_v = 0 for v ∈ N(w)
     let μ_sub := (fun v => if G.Adj w v then 0 else μ v) ∘ (↑) -- Substitution μ_v = 0 for v ∈ N(w)
     Z_G_2 G η μ =
-      Z_G_2 G_minus_v η_rest μ_rest +
-      η w * Z_G_2 G_minus_v η_sub μ_rest +
-      μ w * Z_G_2 G_minus_v η_rest μ_sub := by
+      Z_G_2 G_minus_w η_rest μ_rest +
+      η w * Z_G_2 G_minus_w η_sub μ_rest +
+      μ w * Z_G_2 G_minus_w η_rest μ_sub := by
   convert congr_arg₂ ( · + · ) ( congr_arg₂ ( · + · ) ( Z_G_2_term1 G w η μ ) ( Z_G_2_term2 G w η μ ) ) ( Z_G_2_term3 G w η μ ) using 1;
   simp +decide only [← Finset.sum_add_distrib];
   refine' Finset.sum_congr rfl fun I _ => Finset.sum_congr rfl fun J _ => _;

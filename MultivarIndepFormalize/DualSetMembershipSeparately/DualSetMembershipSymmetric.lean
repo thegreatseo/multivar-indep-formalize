@@ -1,6 +1,10 @@
+-- Harmonic `generalize_proofs` tactic
+
 import MultivarIndepFormalize.Definitions
 import MultivarIndepFormalize.DualSetMembershipSeparately.Uniquexk
 import MultivarIndepFormalize.DualSetMembershipSeparately.xkComparison
+import MultivarIndepFormalize.DualSetMembershipSeparately.xkDerivative
+import MultivarIndepFormalize.DualSetMembershipSeparately.RkMonotone
 
 set_option linter.style.longLine false
 set_option linter.mathlibStandardSet false
@@ -21,56 +25,6 @@ set_option autoImplicit false
 
 noncomputable section
 
--- Part A: The technical derivative of the scaling function
-/--
-The implicit derivative of the zero-finding function x_k(s) for s > 1.
-Matches equation (3.14) on page 11.
--/
-lemma deriv_x_k (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 → s < 2) :
-    let x_ext : ℝ → ℝ := fun t => if ht : (1 ≤ t) ∧ (k = 1 → t < 2) then
-        x_k k hk t ht.1 ht.2
-      else
-        0
-    let x := x_ext s
-    HasDerivAt x_ext
-      (s ^ (k - 1) * B_d k x / (2 * (k - 1) * x + 2 - s ^ k)) s := by
-  /-
-  PROOF STRATEGY:
-  1. Use the relation A_k(x) = s^k * B_k(x) from the definition of x_k[cite: 990].
-  2. Apply the Implicit Function Theorem or 'HasDerivAt.deriv_comp' to the
-     identity H_k(x_k(s)) = s^k[cite: 990].
-  3. Differentiate both sides with respect to s:
-     H_k'(x) * dx/ds = k * s^(k-1)[cite: 695, 990].
-  4. Substitute the expression for H_k' from Equation (3.11) and solve for dx/ds[cite: 680, 990].
-  -/
-  sorry
-
-/--
-The derivative of log R_k(s) with respect to s for s > 1.
-Matches equation (3.15) on page 11 of the paper:
-∂_s log R_k(s) = -s^(k-1) / (s^k + 2x_k(s)).
--/
-lemma log_Rk_diff (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 → s < 2) :
-    let log_Rk_ext : ℝ → ℝ := fun t => if ht: (1 ≤ t) ∧ (k = 1 → t < 2) then
-        Real.log (R_k k hk t ht.1 ht.2)
-      else
-        0
-    let x := x_k k hk s hs.le hks
-    HasDerivAt log_Rk_ext
-      (-s ^ (k - 1) / (s ^ k + 2 * x)) s := by
-  /-
-  PROOF STRATEGY:
-  1. Expand log R_k(s) = (1/k) * log (B_k(x)) - (1/(k+1)) * log (A_{k+1}(x))
-     where x = x_k(s)[cite: 986].
-  2. Apply the Chain Rule: d/ds [log R_k(s)] = (d/dx [log R_k(x)] * dx/ds)[cite: 987].
-  3. Use 'deriv_x_k' for the dx/ds term.
-  4. Use the identity A_{k+1}(x) = (s^k + 2x)B_k(x) to simplify the
-     d/dx term to (s^k - 2(k-1)x - 2) / ((s^k + 2x) * B_k(x))[cite: 693, 988].
-  5. Multiplying the two terms leads to a cancellation of (2(k-1)x + 2 - s^k),
-     leaving the target expression -s^(k-1) / (s^k + 2x)[cite: 991, 992].
-  -/
-  sorry
-
 /--
 The relationship between the base weight w₀ and the slope weight w₁
 in terms of the invariant ratio s. Matches page 11.
@@ -87,24 +41,18 @@ lemma weight_ratio_relation (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 ≤ s) (h
   3. Simplify the power (A_d / B_d)^(1/k) = s to A_d^(1/k) = s * B_d^(1/k).
   4. Divide both sides by A_{k+1}^{1/(k+1)} to match the definitions of w₀ and w₁.
   -/
-  sorry
-
-/--
-Monotonicity of R_k(s): R_{d+1}(s) ≤ R_d(s) for Δ ≥ d.
-Matches the logic leading to equation (3.15) on page 11.
--/
-lemma R_k_monotonicity (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (hds : d = 1 → s < 2) :
-    R_k (d + 1) (by linarith) s hs (by intro h; linarith) ≤ R_k d hd s hs hds := by
-  /-
-  PROOF STRATEGY:
-  1. Compute R_k(1) = 1 for all k ≥ 1.
-  2. Use log_Rk_diff (Part A): ∂_s log R_k(s) = -s^(k-1) / (s^k + 2x_k(s)).
-  3. Use x_k_comparison (Part B): x_{d+1}(s) ≤ s * x_d(s).
-  4. Combine these to show ∂_s log R_{d+1}(s) ≤ ∂_s log R_d(s).
-  5. Since R_{d+1}(1) = R_d(1) = 1 (at x=0), integration/monotonicity
-     implies R_{d+1}(s) ≤ R_d(s) for all s ≥ 1.
-  -/
-  sorry
+  have h_xk : (A_d k (x_k k hk s hs hks) (x_k k hk s hs hks)) ^ (1 / (k : ℝ)) = s * (B_d k (x_k k hk s hs hks)) ^ (1 / (k : ℝ)) := by
+    -- Substitute x_k into H_k and use the definition of H_k to relate A_d and B_d.
+    have h_Hk : (A_d k (x_k k hk s hs hks) (x_k k hk s hs hks)) / (B_d k (x_k k hk s hs hks)) = s ^ k := by
+      convert congr_arg ( · ^ k ) ( x_k_spec k hk s hs hks |>.2 ) using 1 ; norm_num [ H_k ];
+      rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( div_nonneg ( ?_ ) ( ?_ ) ), inv_mul_cancel₀ ( by positivity ), Real.rpow_one ];
+      · unfold A_d;
+        nlinarith [ show ( k : ℝ ) ≥ 1 by norm_cast, show 0 ≤ ( k : ℝ ) * x_k k hk s hs hks by exact mul_nonneg ( Nat.cast_nonneg _ ) ( x_k_spec k hk s hs hks |>.1 ), show 0 ≤ ( ( k : ℝ ) - 1 ) * x_k k hk s hs hks by exact mul_nonneg ( sub_nonneg.mpr ( Nat.one_le_cast.mpr hk ) ) ( x_k_spec k hk s hs hks |>.1 ) ];
+      · exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( x_k_spec k hk s hs hks |>.1 ) ) zero_le_one;
+    rw [ div_eq_iff ] at h_Hk;
+    · rw [ h_Hk, Real.mul_rpow ( by positivity ) ( by exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( show 0 ≤ x_k k hk s hs hks by exact x_k_spec k hk s hs hks |>.1 ) ) zero_le_one ), ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ), mul_one_div_cancel ( by positivity ), Real.rpow_one ];
+    · intro h; rw [ h ] at h_Hk; norm_num at h_Hk; linarith [ pow_pos ( zero_lt_one.trans_le hs ) k ] ;
+  grind
 
 /--
 The degree d plane dominates the tangent plane at α.

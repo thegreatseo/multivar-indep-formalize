@@ -7,7 +7,7 @@ In the statements and proofs, replace every \lambda to \eta.
 
 import MultivarIndepFormalize.Definitions
 import MultivarIndepFormalize.DualSetLogConvex
-import MultivarIndepFormalize.DualSetMembershipSeparately
+import MultivarIndepFormalize.DualSetMembershipSeparately.DualSetMembershipSeparately
 
 set_option linter.style.longLine false
 
