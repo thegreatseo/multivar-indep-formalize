@@ -71,7 +71,19 @@ lemma degree_d_plane_dominance (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_
   2. Since x^Δ is increasing for x ≥ 0, R_Δ(s)^Δ ≤ R_d(s)^Δ, which gives w₁ ≥ a₁.
   3. Since s ≥ 1, multiplying both sides by s^Δ gives w₁ * s^Δ ≥ a₁ * s^Δ, so w₀ ≥ a₀.
   -/
-  sorry
+  have h_Rk_monotonic : R_k d hd s hs hks ≥ R_k Δ (by linarith) s hs (by
+  aesop_cat) := by
+    all_goals generalize_proofs at *;
+    -- By induction on $Δ - d$, we can show that $R_k d hd s hs hks ≥ R_k Δ (by linarith) s hs (by sorry)$.
+    induction' hd_le with d hd ih;
+    · rfl;
+    · rcases d with ( _ | _ | d ) <;> simp_all +decide;
+      · interval_cases d ; norm_num at *;
+        exact?;
+      · exact le_trans ( by simpa using R_k_monotonicity ( d + 2 ) ( by linarith ) s hs ( by aesop ) ) ih
+  have hΔs : Δ = 1 → s < 2 := by intro hΔ₁; exact hks ( le_antisymm (le_of_le_of_eq hd_le hΔ₁) hd )
+  refine' ⟨ mul_le_mul_of_nonneg_right ( Real.rpow_le_rpow _ h_Rk_monotonic <| by positivity ) <| by positivity, Real.rpow_le_rpow _ h_Rk_monotonic <| by positivity ⟩;
+  iterate 2 exact le_of_lt (helper_R_k_pos Δ _ s hs hΔs)
 
 
 -- Part C: Lemma 3.3 Symmetric Case
@@ -91,31 +103,28 @@ lemma SΔ_membership_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_
   USE THE FOLLOWING MODULAR PROOF STRATEGY:
 
   1. RATIO INITIALIZATION:
-     - Define s := (H_k d η) ^ (1 / d). Note that s ≥ 1 since H_k(0) = 1 and
-       H_k is strictly increasing (H_k_strictMonoOn)[cite: 220, 684].
-     - If d = 1, show s < 2 (H_1_tendsto)[cite: 910].
+     - Define s := (H_k d η) ^ (1 / d).
+     - Show s ≥ 1 using 'H_k_strictMonoOn' and the base case H_k(0) = 1.
+     - For the special case d = 1, prove s < 2 using 'H_1_tendsto'.
 
-  2. SCALING FUNCTION DEFINITION:
-     - Let R_d(s) be as defined in R_k. Observe that the weights in the goal
-       satisfy: w₁ = R_d(s)^Δ and w₀ = w₁ * s^Δ[cite: 190, 1012].
-     - This uses the identity from 'weight_ratio_relation'[cite: 1012].
+  2. WEIGHT REPRESENTATION (Applying weight_ratio_relation):
+     - Let x_d := x_k d hd s hs hks.
+     - By 'weight_ratio_relation', show that the weight triple (w₀, w₁, w₁)
+       satisfies: w₀ = w₁ * s^Δ.
+     - Express w₁ explicitly as (R_k d hd s hs hks)^Δ.
 
-  3. MONOTONICITY REDUCTION:
-     - Apply 'R_k_monotonicity' repeatedly (or by induction on k) to show
-       R_Δ(s) ≤ R_{Δ-1}(s) ≤ ... ≤ R_d(s)[cite: 223, 692].
-     - This uses the technical derivative 'log_Rk_diff' and the zero comparison
-       'x_k_comparison'[cite: 227, 703].
+  3. LOCAL PLANE DOMINANCE (Applying degree_d_plane_dominance):
+     - Let a₁ := (R_k Δ (by linarith) s hs (by aesop))^Δ and a₀ := a₁ * s^Δ.
+     - Apply 'degree_d_plane_dominance' to show that our weights satisfy:
+       w₀ ≥ a₀ and w₁ ≥ a₁.
+     - This effectively moves the problem from the degree d triple to the
+       degree Δ triple (the tangent plane).
 
-  4. TANGENT PLANE COMPARISON:
-     - Let α := x_k Δ hΔ s hs₀ hs₁. Define a comparison triple (a₀, a₁, a₁) where
-       a₁ := R_Δ(s)^Δ and a₀ := a₁ * s^Δ[cite: 216, 670].
-     - By 'degree_d_plane_dominance', we have w₁ ≥ a₁ and w₀ ≥ a₀[cite: 1021].
-
-  5. BOUNDARY MEMBERSHIP AND GEOMETRY:
-     - The triple (a₀, a₁, a₁) represents the tangent plane of z = A_{Δ+1}^{1/(Δ+1)}
-       at the point (α, α)[cite: 140, 557].
-     - By Lemma 3.1 (concavity), this tangent plane is in S_Δ[cite: 141, 559].
-     - Since S_Δ is an upper set and (w₀, w₁, w₁) ≥ (a₀, a₁, a₁) pointwise,
-       the degree d plane must also satisfy the membership condition for S_Δ[cite: 1022, 1023].
+  4. BOUNDARY MEMBERSHIP AND UPPER SET:
+     - Identify (a₀, a₁, a₁) as the tangent plane to z = A_{Δ+1}^{1/(Δ+1)}
+       at the point (α, α), where α := x_k Δ ...
+     - Use 'boundary_membership' (Lemma 3.1) to confirm (a₀, a₁, a₁) ∈ S_d Δ.
+     - Invoke the 'upper_set' property of S_d Δ: since (w₀, w₁, w₁) is
+       pointwise greater than a membership triple, it is also in S_d Δ.
   -/
   sorry

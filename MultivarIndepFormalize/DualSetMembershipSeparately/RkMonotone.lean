@@ -79,6 +79,15 @@ lemma helper_A_k_plus_1_pos (k : ℕ) (x : ℝ) (hk : 1 ≤ k) (hx : 0 ≤ x) : 
   unfold A_d;
   norm_num ; positivity
 
+lemma helper_R_k_pos (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 ≤ s) (hks : k = 1 → s < 2) :
+    0 < R_k k hk s hs hks := by
+  unfold R_k
+  refine div_pos ?_ ?_
+  · refine Real.rpow_pos_of_pos ?_ _
+    exact helper_B_k_pos k _ hk ( x_k_spec k hk s hs hks ).1
+  · refine Real.rpow_pos_of_pos ?_ _
+    exact helper_A_k_plus_1_pos k _ hk ( x_k_spec k hk s hs hks ).1
+
 /-
 Derivative of log R_k(x) with respect to x.
 -/
