@@ -1,3 +1,5 @@
+-- Harmonic `generalize_proofs` tactic
+
 import MultivarIndepFormalize.Definitions
 import MultivarIndepFormalize.DualSetMembershipSeparately.Uniquexk
 import MultivarIndepFormalize.DualSetMembershipSeparately.xkComparison
@@ -60,6 +62,7 @@ lemma deriv_weight_difference (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d)
   3. Differentiate (B^p + C^p) with respect to t: d(B^p + C^p)/dt = p(B^p - C^p). [cite: 202, 650]
   4. Combine using the Chain Rule to obtain the target derivative expression. [cite: 203, 652]
   -/
+  refine HasDerivAt.mul_const ?_ (D ^ (- (Δ : ℝ) / (d + 1)))
   sorry
 
 /--
@@ -75,7 +78,12 @@ lemma weight_difference_nonnegative (p : ℝ) (hp : p ≥ 1) (A B C : ℝ) (hABC
   3. Because p ≥ 1, the function ζ^(p-1) is non-decreasing, so A^(p-1) ≥ ζ^(p-1).
   4. Therefore, (B - C) * p * A^(p-1) ≥ ∫_C^B p * ζ^(p-1) dζ = B^p - C^p.
   -/
-  sorry
+  obtain ⟨c, hc⟩ : ∃ c ∈ Set.Icc C B, B^p - C^p = p * c^(p-1) * (B - C) := by
+    by_cases hB : B = C;
+    · aesop;
+    · have := exists_deriv_eq_slope ( f := fun x => x ^ p ) ( show B > C from lt_of_le_of_ne hABC.2.1 ( Ne.symm hB ) );
+      exact this ( by exact continuousOn_of_forall_continuousAt fun x hx => by exact ContinuousAt.rpow ( continuousAt_id ) continuousAt_const <| Or.inr <| by linarith ) ( by exact fun x hx => by exact DifferentiableAt.differentiableWithinAt <| by apply_rules [ DifferentiableAt.rpow ] <;> norm_num ; linarith [ hx.1, hx.2 ] ) |> fun ⟨ c, hc₁, hc₂ ⟩ => ⟨ c, Set.Ioo_subset_Icc_self hc₁, by rw [ eq_div_iff ( sub_ne_zero_of_ne hB ) ] at hc₂; norm_num [ show c ≠ 0 by linarith [ hc₁.1, hc₁.2 ] ] at hc₂ ⊢; linarith ⟩;
+  nlinarith [ show 0 ≤ p * ( B - C ) by exact mul_nonneg ( by positivity ) ( by linarith ), show c ^ ( p - 1 ) ≤ A ^ ( p - 1 ) by exact Real.rpow_le_rpow ( by linarith [ hc.1.1 ] ) ( by linarith [ hc.1.2 ] ) ( by linarith ) ]
 
 /--
 Converts the geometric mean B-value K back to the fugacity parameter η.
@@ -100,14 +108,14 @@ lemma A_d_K_to_η (d : ℕ) (hd : 1 ≤ d) (K : ℝ) :
 Lemma 3.3 Reduction: The function f(t) = w₀ - (w₁ + w₂)/Δ is non-decreasing for t ≥ 0.
 Matches the derivative analysis on page 10[cite: 203, 652].
 -/
-lemma weight_diff_monotone (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (K D : ℝ) (hK : K > 1) (hD : D > 0) :
+lemma weight_diff_monotone (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (K D : ℝ) (hK : K > 0) (hD : D > 0) :
     let p := (Δ : ℝ) / (d : ℝ)
     let f := λ t =>
       let B := K * exp t
       let C := K * exp (-t)
       let A := ((d - 1) * K ^ 2 + B + C - 1) / d
       (A ^ p - (B ^ p + C ^ p) / Δ) * D ^ (-Δ / (d + 1 : ℝ))
-    MonotoneOn f (Set.Ici 0) := by
+    MonotoneOn f (Set.Icc 0 (log K)) := by
   /-
   PROOF STRATEGY:
   1. Calculate the derivative f'(t) as shown in 'deriv_weight_difference'. [cite: 203, 652]
@@ -123,7 +131,7 @@ The multivariate weight triple is bounded below by the symmetric case
 due to the monotonicity of the dual gap. Matches page 10.
 -/
 lemma dual_gap_minimized_at_symmetry (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d)
-    (η μ : ℝ) (hη : η > 0) (hμ : μ > 0) :
+    (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
     let s := B_d d η * B_d d μ
     let K := sqrt s
     let w₀ := (weight_triple Δ d η μ).1
