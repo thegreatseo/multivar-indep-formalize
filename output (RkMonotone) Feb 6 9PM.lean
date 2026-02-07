@@ -1,3 +1,19 @@
+/-
+This file was edited by Aristotle (https://aristotle.harmonic.fun).
+
+Lean version: leanprover/lean4:v4.24.0
+Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
+This project request had uuid: 3e473e77-6620-41a7-aba5-11eac7aa4287
+
+To cite Aristotle, tag @Aristotle-Harmonic on GitHub PRs/issues, and add as co-author to commits:
+Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
+
+The following was proved by Aristotle:
+
+- lemma R_k_monotonicity (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (hds : d = 1 → s < 2) :
+    R_k (d + 1) (by linarith) s hs (by intro h; linarith) ≤ R_k d hd s hs hds
+-/
+
 -- Harmonic `generalize_proofs` tactic
 
 import MultivarIndepFormalize.Definitions
@@ -5,21 +21,31 @@ import MultivarIndepFormalize.DualSetMembershipSeparately.Uniquexk
 import MultivarIndepFormalize.DualSetMembershipSeparately.xkComparison
 import MultivarIndepFormalize.DualSetMembershipSeparately.xkDerivative
 
+
 set_option linter.style.longLine false
+
 set_option linter.mathlibStandardSet false
 
 open scoped BigOperators
+
 open scoped Real
+
 open scoped Nat
+
 open scoped Classical
+
 open scoped Pointwise
 
 set_option maxHeartbeats 0
+
 set_option maxRecDepth 4000
+
 set_option synthInstance.maxHeartbeats 20000
+
 set_option synthInstance.maxSize 128
 
 set_option relaxedAutoImplicit false
+
 set_option autoImplicit false
 
 noncomputable section
