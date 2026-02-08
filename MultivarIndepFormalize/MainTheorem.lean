@@ -1,3 +1,5 @@
+-- Harmonic `generalize_proofs` tactic
+
 /-
 **Theorem 1.4** `thm:semiprop-multiaff-lower-bd`
 The lower bound for the multiaffine polynomial on semiproper colourings with two proper colours
@@ -124,16 +126,16 @@ lemma neighborhood_reduction (w : V) (hw : G.degree w = G.maxDegree)
 
 noncomputable section AristotleLemmas
 
-lemma weight_triple_lower_bound (Δ : ℕ) (η μ : ℝ) (hη : 0 ≤ η) (hμ : 0 ≤ μ) :
-    let w_tri := weight_triple Δ Δ η μ
-    w_tri.1 + w_tri.2.1 * η + w_tri.2.2 * μ ≥ (A_d (Δ + 1) η μ) ^ (1 / ((Δ : ℝ) + 1)) := by
-      rcases lt_trichotomy Δ 1 with hΔ | rfl | hΔ <;> norm_num at *;
-      · unfold weight_triple A_d; norm_num [ hΔ ] ; ring_nf; norm_num [ hη, hμ ] ;
-      · unfold weight_triple A_d; norm_num [ ← Real.sqrt_eq_rpow ] ; ring_nf;
-        field_simp;
-        rw [ Real.sq_sqrt ] <;> norm_num [ B_d ] <;> nlinarith [ mul_nonneg hη hμ ];
-      · have := SΔ_membership_separately Δ ( by linarith ) Δ ( by linarith ) ( by linarith ) η μ hη hμ;
-        unfold S_d at this; aesop;
+-- lemma weight_triple_lower_bound (Δ : ℕ) (η μ : ℝ) (hη : 0 ≤ η) (hμ : 0 ≤ μ) :
+--     let w_tri := weight_triple Δ Δ η μ
+--     w_tri.1 + w_tri.2.1 * η + w_tri.2.2 * μ ≥ (A_d (Δ + 1) η μ) ^ (1 / ((Δ : ℝ) + 1)) := by
+--       rcases lt_trichotomy Δ 1 with hΔ | rfl | hΔ <;> norm_num at *;
+--       · unfold weight_triple A_d; norm_num [ hΔ ] ; ring_nf; norm_num [ hη, hμ ] ;
+--       · unfold weight_triple A_d; norm_num [ ← Real.sqrt_eq_rpow ] ; ring_nf;
+--         field_simp;
+--         rw [ Real.sq_sqrt ] <;> norm_num [ B_d ] <;> nlinarith [ mul_nonneg hη hμ ];
+--       · have := SΔ_membership_separately Δ ( by linarith ) Δ ( by linarith ) ( by linarith ) η μ hη hμ;
+--         unfold S_d at this; aesop;
 
 lemma product_decomposition (w : V) (f : V → ℝ) :
     (∏ v ∈ (Finset.univ.erase w) \ (G.neighborFinset w), f v) *
@@ -154,7 +156,14 @@ lemma inductive_step_bound (η μ : V → ℝ) (hη : 0 ≤ η) (hμ : 0 ≤ μ)
         rcases isEmpty_or_nonempty V with hV | hV
         · simp [Z_G_2_empty G _ _]
         · let w := Classical.choose G.exists_maximal_degree_vertex
-          have hw : G.degree w = G.maxDegree := by sorry
+          have hw : G.degree w = G.maxDegree := by
+            generalize_proofs at *;
+            -- By definition of `maxDegree`, there exists a vertex `w` such that `G.degree w = G.maxDegree`. Use `Classical.choose` to obtain such a vertex and then show that its degree is indeed the maximum.
+            have hw_max : G.degree w = G.maxDegree := by
+              have := Classical.choose_spec ‹∃ x : V, G.maxDegree = G.degree x›
+              exact this.symm;
+            -- Apply the hypothesis `hw_max` to conclude the proof.
+            exact hw_max
           -- USE neighborhood_reduction with w and hw
           have h_neighborhood_reduction : let Δ := G.degree w;
               let w_tri := weight_triple Δ Δ (η w) (μ w);
@@ -179,7 +188,9 @@ lemma inductive_step_bound (η μ : V → ℝ) (hη : 0 ≤ η) (hμ : 0 ≤ μ)
                 ((d_v + 1) * d_v * η v * μ v + (d_v + 1) * (η v + μ v) + 1) ^ (1 / (d_v + 1)) := by
             convert product_decomposition G w _ using 1;
           -- rw [h_product_decomposition] at h_neighborhood_reduction
-          sorry
+          -- By definition of $A_d$, we know that $A_d (Δ + 1) (η w) (μ w) = term_w$.
+          simp [A_d] at *;
+          grind
 
 end AristotleLemmas
 
@@ -218,6 +229,20 @@ theorem semiproper_multiaff_lower_bd (η μ : V → ℝ)
     Z_G_2 G' η' μ' ≥ ∏ v : V',
       let d_v := (G'.degree v : ℝ)
       ((d_v + 1) * d_v * η' v * μ' v + (d_v + 1) * (η' v + μ' v) + 1) ^ (1 / (d_v + 1)) := by
-        sorry
+        intros V' _ _ G' _' μ' h_card hη' hμ';
+        by_cases hV' : Nonempty V';
+        · intro h_card_nonneg;
+          induction' n : Fintype.card V' using Nat.strong_induction_on with n ih generalizing V' G' μ' h_card;
+          -- Apply the induction hypothesis to the graph G' with the given conditions.
+          apply inductive_step_bound G' μ' h_card hμ' h_card_nonneg;
+          intros V'' _ _ G'' _''' μ'' h_card'' hη'' hμ'';
+          intro h_card''_nonneg;
+          by_cases hV'' : Nonempty V'';
+          · exact ih _ ( by linarith ) _ _ _ _ ( by linarith ) hμ'' hV'' h_card''_nonneg rfl;
+          · simp +zetaDelta at *;
+            unfold Z_G_2; simp +decide [ Finset.prod_empty ] ;
+            simp +decide [ Inhabited.default ];
+        · simp +zetaDelta at *;
+          rw [ show Z_G_2 G' μ' h_card = 1 by exact? ] ; norm_num
 
   exact inductive_step_bound G η μ h_pos_η h_pos_μ h_induction_step;
