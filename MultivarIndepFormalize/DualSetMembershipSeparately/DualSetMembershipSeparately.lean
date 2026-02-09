@@ -39,11 +39,13 @@ def weight_triple (Δ d : ℕ) (η μ : ℝ) : ℝ × ℝ × ℝ :=
   let Ad_next := A_d (d + 1) η μ
   (Ad ^ p / Ad_next ^ q, Bdμ ^ p / Ad_next ^ q, Bdη ^ p / Ad_next ^ q)
 
+noncomputable section AristotleLemmas
+
 /--
 The derivative of the difference f(t) = w₀(t) - (w₁(t) + w₂(t))/Δ.
 Matches the logic on page 10.
 -/
-lemma deriv_weight_difference (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d)
+lemma deriv_weight_difference (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
     (K : ℝ) (hK : K > 0) (D : ℝ) (hD : D > 0) (t : ℝ) :
     let p := (Δ : ℝ) / (d : ℝ)
     let B := K * exp t
@@ -62,8 +64,19 @@ lemma deriv_weight_difference (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d)
   3. Differentiate (B^p + C^p) with respect to t: d(B^p + C^p)/dt = p(B^p - C^p). [cite: 202, 650]
   4. Combine using the Chain Rule to obtain the target derivative expression. [cite: 203, 652]
   -/
-  refine HasDerivAt.mul_const ?_ (D ^ (- (Δ : ℝ) / (d + 1)))
-  sorry
+  have hp_ge_1 : 1 ≤  (Δ : ℝ) / d := by field_simp; exact Nat.cast_le.mpr hd_le
+  field_simp;
+  convert HasDerivAt.div_const ( HasDerivAt.mul ( HasDerivAt.sub ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.rpow_const ( HasDerivAt.div_const ( HasDerivAt.sub ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.add ( HasDerivAt.add ( HasDerivAt.const_mul _ ( hasDerivAt_const _ _ ) ) ( Real.hasDerivAt_exp _ ) ) ( HasDerivAt.exp ( hasDerivAt_neg _ ) ) ) ) ( hasDerivAt_const _ _ ) ) _ ) _ ) ) ( HasDerivAt.add ( HasDerivAt.rpow_const ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( Real.hasDerivAt_exp _ ) ) _ ) ( HasDerivAt.rpow_const ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.exp ( hasDerivAt_neg _ ) ) ) _ ) ) ) ( hasDerivAt_const _ _ ) ) _ using 1 ; norm_num ; ring;
+  · field_simp;
+    rw [ Real.mul_rpow ( by positivity ) ( by positivity ), Real.mul_rpow ( by positivity ) ( by positivity ) ] ; ring;
+    rw [ Real.mul_rpow ( by positivity ) ( by positivity ), Real.mul_rpow ( by positivity ) ( by positivity ) ] ; ring;
+    norm_num [ Real.rpow_sub hK, Real.rpow_sub ( Real.exp_pos _ ), Real.rpow_sub ( Real.exp_pos _ ) ] ; ring;
+    norm_num [ Real.exp_neg, Real.exp_log hK, ne_of_gt ( zero_lt_one.trans_le hd ) ] ; ring;
+    norm_num [ mul_assoc, mul_comm K, hK.ne', Real.exp_ne_zero ] ; ring;
+    norm_num [ mul_assoc, mul_comm, mul_left_comm, Real.exp_ne_zero ];
+  · exact Or.inr hp_ge_1;
+  · exact Or.inl <| ne_of_gt <| mul_pos hK <| Real.exp_pos _;
+  · exact Or.inr hp_ge_1
 
 /--
 The derivative f'(t) is non-negative for t ≥ 0, since A ≥ B ≥ C.
@@ -104,7 +117,7 @@ lemma A_d_K_to_η (d : ℕ) (hd : 1 ≤ d) (K : ℝ) :
   field_simp
   ring
 
-lemma weight_diff_inequalities (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hdΔ : d ≤ Δ)
+lemma weight_diff_inequalities (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
     (K : ℝ) (hK : K > 0) (t : ℝ) (ht : t ∈ Set.Icc 0 (Real.log K)) :
     let p := (Δ : ℝ) / (d : ℝ)
     let B := K * Real.exp t
@@ -126,7 +139,7 @@ lemma weight_diff_inequalities (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd�
 Lemma 3.3 Reduction: The function f(t) = w₀ - (w₁ + w₂)/Δ is non-decreasing for t ≥ 0.
 Matches the derivative analysis on page 10[cite: 203, 652].
 -/
-lemma weight_diff_monotone (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hdΔ : d ≤ Δ) (K D : ℝ) (hK : K > 0) (hD : D > 0) :
+lemma weight_diff_monotone (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ) (K D : ℝ) (hK : K > 0) (hD : D > 0) :
     let p := (Δ : ℝ) / (d : ℝ)
     let f := λ t =>
       let B := K * exp t
@@ -157,9 +170,9 @@ lemma weight_diff_monotone (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hdΔ : 
       · exact DifferentiableOn.div_const ( DifferentiableOn.add ( DifferentiableOn.rpow ( DifferentiableOn.mul ( differentiableOn_const _ ) ( Real.differentiable_exp.differentiableOn ) ) ( differentiableOn_const _ ) ( by intro t ht; exact ne_of_gt ( mul_pos hK ( Real.exp_pos _ ) ) ) ) ( DifferentiableOn.rpow ( DifferentiableOn.mul ( differentiableOn_const _ ) ( Real.differentiable_exp.comp_differentiableOn ( differentiableOn_id.neg ) ) ) ( differentiableOn_const _ ) ( by intro t ht; exact ne_of_gt ( mul_pos hK ( Real.exp_pos _ ) ) ) ) ) _;
     · exact differentiableOn_const _;
   · intro t ht;
-    convert HasDerivAt.deriv ( deriv_weight_difference Δ d hΔ hd K hK D hD t ) |> fun h => h.symm ▸ mul_nonneg ?_ ?_ using 1;
+    convert HasDerivAt.deriv ( deriv_weight_difference Δ d hΔ hd hd_le K hK D hD t ) |> fun h => h.symm ▸ mul_nonneg ?_ ?_ using 1;
     · refine' mul_nonneg ( inv_nonneg.2 ( Nat.cast_nonneg _ ) ) _;
-      have := weight_diff_inequalities Δ d hΔ hd hdΔ K hK t ( interior_subset ht );
+      have := weight_diff_inequalities Δ d hΔ hd hd_le K hK t ( interior_subset ht );
       convert sub_nonneg_of_le ( weight_difference_nonnegative _ this.1 _ _ _ _ ) using 1;
       grind;
     · positivity
@@ -238,7 +251,7 @@ lemma weight_diff_fun_min (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : 
           let C := K * Real.exp (-t)
           let A := ((d - 1) * K ^ 2 + B + C - 1) / d
           (p * (B - C) * A ^ (p - 1) - (B ^ p - C ^ p)) * D ^ (- (Δ : ℝ) / (d + 1))) := by
-            convert HasDerivAt.deriv ( deriv_weight_difference Δ d hΔ hd K ( by positivity ) D ( by positivity ) t ) using 1;
+            convert HasDerivAt.deriv ( deriv_weight_difference Δ d hΔ hd hd_le K ( by positivity ) D ( by positivity ) t ) using 1;
             ring;
         rw [h_deriv];
         apply_rules [ mul_nonneg, inv_nonneg.mpr, Real.rpow_nonneg ] <;> norm_num;
@@ -373,10 +386,20 @@ lemma dual_gap_minimized_at_symmetry (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d
     let w₁_sym := (weight_triple Δ d (K_to_η d K) (K_to_η d K)).2.1
     w₀ - (w₁ + w₂) / Δ ≥ w₀_sym - (2 * w₁_sym) / Δ := by
   simp only [weight_triple_diff_eq_fun Δ d hΔ hd η μ hη hμ]
-  #check symmetric_weight_diff_eq_fun_zero Δ d hΔ hd (K_to_η d √(B_d d η * B_d d μ)) (K_to_η d √(B_d d η * B_d d μ))
-  -- Use weight_triple_diff_eq_fun Δ d hΔ hd η μ hη hμ and symmetric_weight_diff_eq_fun_zero
-  -- Conclude using weight_diff_fun_min
-  sorry
+  have := @weight_diff_fun_min Δ d hΔ hd hd_le (Real.sqrt (B_d d η * B_d d μ)) (A_d (d + 1) η μ) ?_ ?_ (1 / 2 * Real.log (B_d d μ / B_d d η)) ?_ <;> norm_num at *;
+  · convert add_le_add_right this ( 2 * ( weight_triple Δ d ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ).2.1 / ( Δ : ℝ ) ) using 1;
+    rw [ show weight_diff_fun Δ d ( Real.sqrt ( B_d d η * B_d d μ ) ) ( A_d ( d + 1 ) η μ ) 0 = ( weight_triple Δ d ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ).1 - ( 2 * ( weight_triple Δ d ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ).2.1 ) / ( Δ : ℝ ) from ?_ ];
+    · ring;
+    · convert symmetric_weight_diff_eq_fun_zero Δ d hΔ hd η μ hη hμ using 1;
+      · exact Eq.symm (symmetric_weight_diff_eq_fun_zero Δ d hΔ hd η μ hη hμ);
+      · convert symmetric_weight_diff_eq_fun_zero Δ d hΔ hd η μ hη hμ using 1;
+        unfold weight_triple; ring;
+    · ring
+  · exact one_le_mul_of_one_le_of_one_le ( by unfold B_d; nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast ] ) ( by unfold B_d; nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast ] );
+  · unfold A_d; ring_nf; norm_num [ hd ];
+    nlinarith [ mul_nonneg ( Nat.cast_nonneg d ) hη, mul_nonneg ( Nat.cast_nonneg d ) hμ, mul_nonneg hη hμ ];
+  · convert K_exp_neg_abs_t_ge_one d hd η μ hη hμ using 1;
+    norm_num [ abs_mul, abs_of_nonneg ]
 
 
 
@@ -384,7 +407,7 @@ lemma dual_gap_minimized_at_symmetry (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d
 The gap w₀ - Φ_Δ(w₁, w₂) is bounded below by the symmetric gap.
 Matches page 10.
 -/
-lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d)
+lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
     (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
     let w := weight_triple Δ d η μ
     let K := (B_d d η * B_d d μ).sqrt
@@ -423,7 +446,7 @@ lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 
   -/
   sorry
 
-/--
+/-
 **Lemma 3.3** `lem:Sn-membership-separately`
 "Something separated" is in S_Δ.
 
@@ -437,7 +460,105 @@ Let \(\Delta\ge2\) and \(1\le d\le \Delta\) be integers. Let \(\lambda,\mu\ge0\)
   \biggr) \in \calS_\Delta.
 \]
 -/
-lemma SΔ_membership_separately (Δ : ℕ) (hΔ : Δ ≥ 2) (d : ℕ) (hd : 1 ≤ d) (hdΔ : d ≤ Δ)
+noncomputable section AristotleLemmas
+
+/-
+If a vector is in S_d, its first component dominates the potential function Φ_Δ.
+-/
+lemma Phi_le_of_mem_S_d (d : ℕ) (v : ℝ × ℝ × ℝ) (h : v ∈ S_d d) :
+  v.1 ≥ Φ_Δ d v.2.1 v.2.2 := by
+    -- By definition of $S_d$, we know that for all $x, y \geq 0$, $v.1 + v.2.1 * x + v.2.2 * y \geq (A_d (d + 1) x y) ^ (1 / (d + 1))$.
+    have h_ineq : ∀ x y : ℝ, 0 ≤ x → 0 ≤ y → v.1 + v.2.1 * x + v.2.2 * y ≥ (A_d (d + 1) x y) ^ (1 / (d + 1 : ℝ)) := by
+      exact h.2.2.2;
+    refine' ciSup_le fun x => _;
+    rw [ @ciSup_eq_ite ];
+    split_ifs <;> norm_num;
+    · refine' ciSup_le fun y => _;
+      rw [ @ciSup_eq_ite ];
+      split_ifs <;> norm_num at * ; linarith [ h_ineq x y ‹_› ‹_› ];
+      exact le_of_lt ( h.1 );
+    · exact le_of_lt h.1
+
+/-
+A function of the form x^p - ax with 0 < p < 1 and a > 0 is bounded above on [0, ∞).
+-/
+lemma sub_linear_growth_bounded (p : ℝ) (hp : 0 < p) (hp1 : p < 1) (a : ℝ) (ha : a > 0) :
+  BddAbove {y | ∃ x ≥ 0, y = x ^ p - a * x} := by
+    -- The function $f(x) = x^p - ax$ is continuous on $[0, \infty)$ and tends to $-\infty$ as $x \to \infty$, so it must attain a maximum.
+    have h_cont : ContinuousOn (fun x : ℝ => x^p - a * x) (Set.Ici 0) := by
+      exact continuousOn_of_forall_continuousAt fun x hx => ContinuousAt.sub ( ContinuousAt.rpow continuousAt_id continuousAt_const <| Or.inr <| by linarith ) ( continuousAt_const.mul continuousAt_id );
+    -- Since $f(x) \to -\infty$ as $x \to \infty$, there exists some $M > 0$ such that $f(x) < 0$ for all $x > M$.
+    obtain ⟨M, hM⟩ : ∃ M > 0, ∀ x > M, x^p - a * x < 0 := by
+      -- Since $p < 1$, we have $\lim_{x \to \infty} \frac{x^p}{x} = 0$.
+      have h_lim : Filter.Tendsto (fun x : ℝ => x^p / x) Filter.atTop (nhds 0) := by
+        have h_lim : Filter.Tendsto (fun x : ℝ => x ^ (p - 1)) Filter.atTop (nhds 0) := by
+          simpa using tendsto_rpow_neg_atTop ( by linarith : 0 < - ( p - 1 ) ) |> Filter.Tendsto.comp <| Filter.tendsto_id;
+        refine h_lim.congr' ( by filter_upwards [ Filter.eventually_gt_atTop 0 ] with x hx using by rw [ Real.rpow_sub_one hx.ne' ] );
+      exact Filter.eventually_atTop.mp ( h_lim.eventually ( gt_mem_nhds <| show 0 < a by positivity ) ) |> fun ⟨ M, hM ⟩ ↦ ⟨ Max.max M 1, by positivity, fun x hx ↦ by have := hM x ( le_of_lt <| lt_of_le_of_lt ( le_max_left _ _ ) hx ) ; rw [ div_lt_iff₀ ] at this <;> nlinarith [ le_max_right M 1 ] ⟩;
+    -- Since $f(x)$ is continuous on $[0, M]$ and tends to $-\infty$ as $x \to \infty$, it must attain a maximum on this interval.
+    have h_max : ∃ m ∈ Set.Icc 0 M, ∀ x ∈ Set.Icc 0 M, x^p - a * x ≤ m^p - a * m := by
+      exact ( IsCompact.exists_isMaxOn ( CompactIccSpace.isCompact_Icc ) ⟨ 0, Set.left_mem_Icc.mpr hM.1.le ⟩ <| h_cont.mono <| Set.Icc_subset_Ici_self );
+    obtain ⟨ m, hm₁, hm₂ ⟩ := h_max; exact ⟨ Max.max ( m ^ p - a * m ) 0, by rintro x ⟨ y, hy₁, rfl ⟩ ; exact if hy₂ : y ≤ M then by linarith [ hm₂ y ⟨ hy₁, hy₂ ⟩, le_max_left ( m ^ p - a * m ) 0, le_max_right ( m ^ p - a * m ) 0 ] else by linarith [ hM.2 y ( not_le.mp hy₂ ), le_max_left ( m ^ p - a * m ) 0, le_max_right ( m ^ p - a * m ) 0 ] ⟩ ;
+
+/-
+The potential function terms are bounded above for d ≥ 2.
+-/
+lemma Phi_expression_bounded (d : ℕ) (hd : d ≥ 2) (a₁ a₂ : ℝ) (ha₁ : a₁ > 0) (ha₂ : a₂ > 0) :
+  BddAbove { z | ∃ x y, x ≥ 0 ∧ y ≥ 0 ∧ z = (A_d (d + 1) x y) ^ (1 / ((d : ℝ) + 1)) - a₁ * x - a₂ * y } := by
+    -- By definition of $A_d$, we know that $A_d (d + 1) x y \leq C (x + y + 1)^2$ for some constant $C$.
+    obtain ⟨C, hC⟩ : ∃ C > 0, ∀ x y : ℝ, 0 ≤ x → 0 ≤ y → A_d (d + 1) x y ≤ C * (x + y + 1)^2 := by
+      refine ⟨ ( d + 1 ) * ( d + 1 ) + 1, by positivity, fun x y hx hy => ?_ ⟩ ; unfold A_d ; ring_nf;
+      norm_num ; nlinarith [ sq_nonneg ( x - y ), mul_nonneg hx hy, mul_nonneg hx ( sq_nonneg ( d : ℝ ) ), mul_nonneg hy ( sq_nonneg ( d : ℝ ) ) ];
+    -- Using the bound on $A_d$, we can show that the function $g(u) = C' * u^p - A * u$ is bounded above.
+    have h_g_bounded : ∃ C' > 0, ∀ x y : ℝ, 0 ≤ x → 0 ≤ y → (A_d (d + 1) x y) ^ (1 / (d + 1 : ℝ)) - a₁ * x - a₂ * y ≤ C' * (x + y + 1) ^ (2 / (d + 1 : ℝ)) - a₁ * x - a₂ * y := by
+      refine' ⟨ C ^ ( 1 / ( d + 1 : ℝ ) ), Real.rpow_pos_of_pos hC.1 _, fun x y hx hy => _ ⟩;
+      gcongr;
+      convert Real.rpow_le_rpow ( show 0 ≤ A_d ( d + 1 ) x y from ?_ ) ( hC.2 x y hx hy ) ( show ( 0 : ℝ ) ≤ 1 / ( d + 1 ) by positivity ) using 1 ; rw [ Real.mul_rpow ( by linarith ) ( by positivity ) ] ; rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ) ] ; ring;
+      exact add_nonneg ( add_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( sub_nonneg.mpr ( by norm_cast; linarith ) ) ) ( by positivity ) ) ( by positivity ) ) ( mul_nonneg ( Nat.cast_nonneg _ ) ( add_nonneg ( by positivity ) ( by positivity ) ) ) ) zero_le_one;
+    -- Using the bound on $g(u)$, we can show that the function $f(x, y)$ is bounded above.
+    obtain ⟨C', hC', h_bound⟩ := h_g_bounded
+    have h_f_bounded : ∃ M : ℝ, ∀ x y : ℝ, 0 ≤ x → 0 ≤ y → C' * (x + y + 1) ^ (2 / (d + 1 : ℝ)) - a₁ * x - a₂ * y ≤ M := by
+      have h_g_bounded : ∃ M : ℝ, ∀ u : ℝ, 0 ≤ u → C' * u ^ (2 / (d + 1 : ℝ)) - min a₁ a₂ * u ≤ M := by
+        have h_g_bounded : ∃ M : ℝ, ∀ u : ℝ, 0 ≤ u → u ^ (2 / (d + 1 : ℝ)) - (min a₁ a₂ / C') * u ≤ M := by
+          have := @sub_linear_growth_bounded ( 2 / ( d + 1 : ℝ ) ) ( by positivity ) ( by rw [ div_lt_iff₀ ] <;> norm_cast <;> linarith ) ( Min.min a₁ a₂ / C' ) ( by exact div_pos ( lt_min ha₁ ha₂ ) hC' );
+          exact ⟨ this.choose, fun u hu => this.choose_spec ⟨ u, hu, rfl ⟩ ⟩;
+        exact ⟨ h_g_bounded.choose * C', fun u hu => by nlinarith [ h_g_bounded.choose_spec u hu, mul_div_cancel₀ ( Min.min a₁ a₂ ) hC'.ne' ] ⟩;
+      obtain ⟨ M, hM ⟩ := h_g_bounded; use M + min a₁ a₂; intros x y hx hy; specialize hM ( x + y + 1 ) ( by linarith ) ; cases min_cases a₁ a₂ <;> nlinarith;
+    exact ⟨ h_f_bounded.choose, by rintro _ ⟨ x, y, hx, hy, rfl ⟩ ; exact le_trans ( h_bound x y hx hy ) ( h_f_bounded.choose_spec x y hx hy ) ⟩
+
+/-
+Sufficient condition for membership in S_d using Φ_Δ, for d ≥ 2.
+-/
+lemma mem_S_d_of_Phi_le (d : ℕ) (hd : d ≥ 2) (v : ℝ × ℝ × ℝ) (h_pos : v.1 > 0 ∧ v.2.1 > 0 ∧ v.2.2 > 0) (h_le : v.1 ≥ Φ_Δ d v.2.1 v.2.2) : v ∈ S_d d := by
+  -- By definition of $S_d$, we need to show that for all $x, y \geq 0$, $v.1 + v.2.1 * x + v.2.2 * y \geq (A_d (d + 1) x y)^(1/(d + 1))$.
+  have h_ineq : ∀ x y : ℝ, x ≥ 0 → y ≥ 0 → v.1 + v.2.1 * x + v.2.2 * y ≥ (A_d (d + 1) x y)^(1/(d + 1 : ℝ)) := by
+    intro x y hx hy; contrapose! h_le; simp_all +decide [ div_eq_mul_inv ] ;
+    refine' lt_of_lt_of_le _ ( le_ciSup _ x );
+    · rw [ @ciSup_pos ] <;> norm_num [ hx, hy ];
+      refine' lt_of_lt_of_le _ ( le_ciSup _ y ) <;> norm_num [ hx, hy ] ; linarith!;
+      -- The set of values of the function is bounded above by the supremum of the set.
+      have h_bdd_above : BddAbove { z | ∃ y : ℝ, y ≥ 0 ∧ z = (A_d (d + 1) x y) ^ ((d + 1 : ℝ)⁻¹) - v.2.1 * x - v.2.2 * y } := by
+        have h_bdd_above : BddAbove { z | ∃ x y : ℝ, x ≥ 0 ∧ y ≥ 0 ∧ z = (A_d (d + 1) x y) ^ (1 / ((d : ℝ) + 1)) - v.2.1 * x - v.2.2 * y } := by
+          convert Phi_expression_bounded d hd v.2.1 v.2.2 h_pos.2.1 h_pos.2.2 using 1
+        generalize_proofs at *; exact (by
+        exact ⟨ h_bdd_above.choose, fun z hz => by obtain ⟨ y, hy, rfl ⟩ := hz; exact h_bdd_above.choose_spec ⟨ x, y, hx, hy, by norm_num ⟩ ⟩)
+      generalize_proofs at *; exact (by
+      obtain ⟨ M, hM ⟩ := h_bdd_above; use Max.max M 0; rintro _ ⟨ y, rfl ⟩ ; by_cases hy : 0 ≤ y <;> simp +decide [hy] ;
+      exact Or.inl ( by linarith [ hM ⟨ y, hy, rfl ⟩ ] ));
+    · -- By definition of $A_d$, we know that $A_d (d + 1) x y$ is bounded above for $x, y \geq 0$.
+      have h_A_d_bdd_above : BddAbove { z | ∃ x y : ℝ, x ≥ 0 ∧ y ≥ 0 ∧ z = (A_d (d + 1) x y) ^ (1 / ((d : ℝ) + 1)) - v.2.1 * x - v.2.2 * y } := by
+        convert Phi_expression_bounded d hd v.2.1 v.2.2 h_pos.2.1 h_pos.2.2 using 1;
+      obtain ⟨ M, hM ⟩ := h_A_d_bdd_above;
+      refine' ⟨ Max.max M 0, Set.forall_mem_range.2 fun x => _ ⟩ ; by_cases hx : 0 ≤ x <;> simp_all +decide [ upperBounds ] ;
+      refine' Or.inl ( ciSup_le fun y => _ ) ; by_cases hy : 0 ≤ y <;> simp_all +decide [ sub_sub ];
+      · linarith [ hM x hx y hy rfl ];
+      · contrapose! hM;
+        refine' ⟨ _, 0, by norm_num, 0, by norm_num, rfl, _ ⟩ ; norm_num [ A_d ] ; linarith [ show ( d : ℝ ) ≥ 2 by norm_cast ] ;
+  generalize_proofs at *; exact ⟨h_pos.left, h_pos.right.left, h_pos.right.right, h_ineq⟩;
+
+end AristotleLemmas
+
+lemma SΔ_membership_separately (Δ : ℕ) (hΔ : Δ ≥ 2) (d : ℕ) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
     (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
     let Ad := A_d d η μ
     let Bdμ := B_d d μ
@@ -476,4 +597,15 @@ lemma SΔ_membership_separately (Δ : ℕ) (hΔ : Δ ≥ 2) (d : ℕ) (hd : 1 �
        gap is non-negative, conclude that w₀ ≥ Φ_Δ Δ w₁.1 w₁.2. [cite: 207, 1040]
      - This confirms (w₀, w₁, w₂) ∈ S_Δ by the variational definition of the dual set.
   -/
-  sorry
+  apply_rules [ mem_S_d_of_Phi_le ];
+  · refine' ⟨ div_pos _ _, div_pos _ _, div_pos _ _ ⟩;
+    all_goals apply_rules [ Real.rpow_pos_of_pos, add_pos_of_nonneg_of_pos, mul_nonneg, hη, hμ ];
+    all_goals norm_num; try positivity;
+    exact add_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( sub_nonneg.mpr ( Nat.one_le_cast.mpr hd ) ) ) hη ) hμ ) ( mul_nonneg ( Nat.cast_nonneg _ ) ( add_nonneg hη hμ ) );
+  · have := @multivariate_reduction_to_symmetric;
+    specialize this Δ d hΔ hd hd_le η μ hη hμ;
+    have := @SΔ_membership_symmetric;
+    specialize this Δ d hΔ hd hd_le ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ( by
+      exact div_nonneg ( sub_nonneg_of_le <| Real.le_sqrt_of_sq_le <| by nlinarith [ show 1 ≤ B_d d η * B_d d μ by exact one_le_mul_of_one_le_of_one_le ( by exact le_add_of_nonneg_left <| by positivity ) ( by exact le_add_of_nonneg_left <| by positivity ) ] ) <| by positivity; );
+    have := @Phi_le_of_mem_S_d Δ ( weight_triple Δ d ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ( K_to_η d ( Real.sqrt ( B_d d η * B_d d μ ) ) ) ) this;
+    unfold weight_triple at *; linarith;
