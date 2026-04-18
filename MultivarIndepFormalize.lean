@@ -1,1 +1,1 @@
-import MultivarIndepFormalize.Basic
+import MultivarIndepFormalize.MainTheorem

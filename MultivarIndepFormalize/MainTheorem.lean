@@ -69,28 +69,9 @@ The inductive step reduction for Theorem 1.4.
 If the lower bound holds for all graphs with fewer than |V| vertices, then the
 partition function Z_G_2 is bounded below by a term involving the dual weight triple.
 Matches pages 7-8 of the paper.
--/
-lemma neighborhood_reduction (w : V) (hw : G.degree w = G.maxDegree)
-    (η μ : V → ℝ) (hη : 0 ≤ η) (hμ : 0 ≤ μ)
-    (h_ih : ∀ (V' : Type) [Fintype V'] [DecidableEq V'] (G' : SimpleGraph V') [DecidableRel G'.Adj] (η' μ' : V' → ℝ),
-      Fintype.card V' < Fintype.card V → (0 ≤ η') → (0 ≤ μ') →
-      Z_G_2 G' η' μ' ≥ ∏ v : V',
-        let d_v := (G'.degree v : ℝ)
-        ((d_v + 1) * d_v * η' v * μ' v + (d_v + 1) * (η' v + μ' v) + 1) ^ (1 / (d_v + 1))) :
-    let Δ := G.degree w
-    let neighborhood_prod := ∏ v ∈ G.neighborFinset w,
-      let d_v := (G.degree v : ℝ)
-      ((d_v + 1) * d_v * η v * μ v + (d_v + 1) * (η v + μ v) + 1) ^ (1 / (d_v + 1))
-    let remaining_prod := ∏ v ∈ (Finset.univ.erase w) \ (G.neighborFinset w),
-      let d_v := (G.degree v : ℝ)
-      ((d_v + 1) * d_v * η v * μ v + (d_v + 1) * (η v + μ v) + 1) ^ (1 / (d_v + 1))
-    Z_G_2 G η μ ≥ remaining_prod * neighborhood_prod * (A_d (Δ + 1) (η w) (μ w)) ^ (1 / ((Δ : ℝ) + 1)) :=
-  open scoped Classical in
-  by
-  let Δ := G.degree w
-  rw [semiproper_poly_recurrence G η μ w];
-  /-
-  USE THE FOLLOWING PROOF STRATEGY:
+
+PROVIDED SOLUTION
+USE THE FOLLOWING PROOF STRATEGY:
 
   1. APPLY RECURRENCE:
      - Use 'semiproper_poly_recurrence' at vertex w to split Z_G_2 into three
@@ -120,7 +101,26 @@ lemma neighborhood_reduction (w : V) (hw : G.degree w = G.maxDegree)
         ( A_d (Δ + 1) (η w) (μ w) ) ^ (1 / (deg w + 1)) * ∏ v : N(w), ( A_d (deg v + 1) (η v) (μ v) ) ^ (1 / (deg v + 1)).
       - Note that all the vertices in N(w) has degree ≥ 1.
       - Finally, `neighborhood_prod' = ∏ v : N(w), ( A_d (deg v + 1) (η v) (μ v) ) ^ (1 / (deg v + 1)).
-  -/
+-/
+lemma neighborhood_reduction (w : V) (hw : G.degree w = G.maxDegree)
+    (η μ : V → ℝ) (hη : 0 ≤ η) (hμ : 0 ≤ μ)
+    (h_ih : ∀ (V' : Type) [Fintype V'] [DecidableEq V'] (G' : SimpleGraph V') [DecidableRel G'.Adj] (η' μ' : V' → ℝ),
+      Fintype.card V' < Fintype.card V → (0 ≤ η') → (0 ≤ μ') →
+      Z_G_2 G' η' μ' ≥ ∏ v : V',
+        let d_v := (G'.degree v : ℝ)
+        ((d_v + 1) * d_v * η' v * μ' v + (d_v + 1) * (η' v + μ' v) + 1) ^ (1 / (d_v + 1))) :
+    let Δ := G.degree w
+    let neighborhood_prod := ∏ v ∈ G.neighborFinset w,
+      let d_v := (G.degree v : ℝ)
+      ((d_v + 1) * d_v * η v * μ v + (d_v + 1) * (η v + μ v) + 1) ^ (1 / (d_v + 1))
+    let remaining_prod := ∏ v ∈ (Finset.univ.erase w) \ (G.neighborFinset w),
+      let d_v := (G.degree v : ℝ)
+      ((d_v + 1) * d_v * η v * μ v + (d_v + 1) * (η v + μ v) + 1) ^ (1 / (d_v + 1))
+    Z_G_2 G η μ ≥ remaining_prod * neighborhood_prod * (A_d (Δ + 1) (η w) (μ w)) ^ (1 / ((Δ : ℝ) + 1)) :=
+  open scoped Classical in
+  by
+  let Δ := G.degree w
+  rw [semiproper_poly_recurrence G η μ w];
   sorry
 
 

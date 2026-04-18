@@ -406,15 +406,9 @@ lemma dual_gap_minimized_at_symmetry (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d
 /--
 The gap w₀ - Φ_Δ(w₁, w₂) is bounded below by the symmetric gap.
 Matches page 10.
--/
-lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
-    (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
-    let w := weight_triple Δ d η μ
-    let K := (B_d d η * B_d d μ).sqrt
-    let w_sym := weight_triple Δ d (K_to_η d K) (K_to_η d K)
-    w.1 - Φ_Δ Δ w.2.1 w.2.2 ≥ w_sym.1 - Φ_Δ Δ w_sym.2.1 w_sym.2.2 := by
-  /-
-  USE THE FOLLOWING MODULAR PROOF STRATEGY:
+
+PROVIDED SOLUTION
+USE THE FOLLOWING MODULAR PROOF STRATEGY:
 
   1. GEOMETRIC MEAN INVARIANT:
      - Let B := B_d d μ and C := B_d d η. Fix the product BC = K²[cite: 198, 647].
@@ -443,7 +437,13 @@ lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 
   5. FINAL COMPARISON:
      - Combine the functional minimum from Step 2 with the boundary equality
        from Step 4 to close the goal[cite: 206, 658].
-  -/
+-/
+lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
+    (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
+    let w := weight_triple Δ d η μ
+    let K := (B_d d η * B_d d μ).sqrt
+    let w_sym := weight_triple Δ d (K_to_η d K) (K_to_η d K)
+    w.1 - Φ_Δ Δ w.2.1 w.2.2 ≥ w_sym.1 - Φ_Δ Δ w_sym.2.1 w_sym.2.2 := by
   sorry
 
 /-
