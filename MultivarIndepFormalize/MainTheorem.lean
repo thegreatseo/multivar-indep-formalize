@@ -10,6 +10,7 @@ NOTE: In the statements and proofs, replace every \lambda to \eta.
 import MultivarIndepFormalize.Definitions
 import MultivarIndepFormalize.DualSetMembership
 import MultivarIndepFormalize.SemiproperPolyRecurrence
+import MultivarIndepFormalize.NeighborhoodHelper
 
 set_option linter.style.longLine false
 set_option linter.mathlibStandardSet false
@@ -21,7 +22,7 @@ set_option maxRecDepth 4000
 set_option synthInstance.maxHeartbeats 20000
 set_option synthInstance.maxSize 128
 
-variable {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
+variable {V : Type} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
 
 noncomputable section
 
@@ -120,8 +121,28 @@ lemma neighborhood_reduction (w : V) (hw : G.degree w = G.maxDegree)
   open scoped Classical in
   by
   let Δ := G.degree w
-  rw [semiproper_poly_recurrence G η μ w];
-  sorry
+  rw [semiproper_poly_recurrence G η μ w]
+  -- Step 1: Lower bound each Z_G_2 using h_ih
+  have h_card : Fintype.card {x : V // x ≠ w} < Fintype.card V :=
+    Fintype.card_subtype_lt (p := fun x => x ≠ w) (x := w) (by simp)
+  let G' := G.induce {x | x ≠ w}
+  have h1 := h_ih ({x : V // x ≠ w}) G' (η ∘ Subtype.val) (μ ∘ Subtype.val) h_card
+    (fun v => hη v.1) (fun v => hμ v.1)
+  have h2 := h_ih ({x : V // x ≠ w}) G' ((fun v => if G.Adj w v then 0 else η v) ∘ Subtype.val) (μ ∘ Subtype.val) h_card
+    (fun v => by simp; split_ifs <;> [exact le_refl 0; exact hη v.1]) (fun v => hμ v.1)
+  have h3 := h_ih ({x : V // x ≠ w}) G' (η ∘ Subtype.val) ((fun v => if G.Adj w v then 0 else μ v) ∘ Subtype.val) h_card
+    (fun v => hη v.1) (fun v => by simp; split_ifs <;> [exact le_refl 0; exact hμ v.1])
+  -- The remaining argument: case split on Δ and use helper lemmas
+  rcases Nat.lt_or_ge (G.degree w) 1 with hΔ_zero | hΔ_ge1
+  · -- Δ = 0 case
+    have hΔ : G.degree w = 0 := by omega
+    exact neighborhood_reduction_delta_zero G w η μ hη hμ hΔ h_ih
+  · rcases Nat.lt_or_ge (G.degree w) 2 with hΔ_one | hΔ_ge2
+    · -- Δ = 1 case
+      have hΔ : G.degree w = 1 := by omega
+      exact neighborhood_reduction_delta_one G w η μ hη hμ hΔ hw h_ih
+    · -- Δ ≥ 2 case
+      exact neighborhood_reduction_delta_ge_two G w η μ hη hμ hΔ_ge2 hw h_ih
 
 
 noncomputable section AristotleLemmas
@@ -246,3 +267,6 @@ theorem semiproper_multiaff_lower_bd (η μ : V → ℝ)
           rw [ show Z_G_2 G' μ' h_card = 1 by exact? ] ; norm_num
 
   exact inductive_step_bound G η μ h_pos_η h_pos_μ h_induction_step;
+
+
+#print axioms semiproper_multiaff_lower_bd

@@ -4,6 +4,7 @@ import MultivarIndepFormalize.Definitions
 import MultivarIndepFormalize.DualSetMembershipSeparately.Uniquexk
 import MultivarIndepFormalize.DualSetMembershipSeparately.xkComparison
 import MultivarIndepFormalize.DualSetMembershipSeparately.DualSetMembershipSymmetric
+import MultivarIndepFormalize.DualSetBoundary
 
 set_option linter.style.longLine false
 set_option linter.mathlibStandardSet false
@@ -401,42 +402,72 @@ lemma dual_gap_minimized_at_symmetry (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d
   · convert K_exp_neg_abs_t_ge_one d hd η μ hη hμ using 1;
     norm_num [ abs_mul, abs_of_nonneg ]
 
+/-- A_d(d+1) is invariant under K-symmetrization: A_d(d+1, η_sym, η_sym) = A_d(d+1, η, μ)
+where η_sym = K_to_η d (sqrt(B_d d η * B_d d μ)). -/
+lemma Ad_next_sym_eq (d : ℕ) (hd : 1 ≤ d) (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
+    A_d (d + 1) (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) = A_d (d + 1) η μ := by
+  have h1 := Ad_plus_one_eq_of_prod_Bd d hd (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))
+  have h2 := Ad_plus_one_eq_of_prod_Bd d hd η μ
+  have h3 := B_d_K_to_η d hd (Real.sqrt (B_d d η * B_d d μ))
+  have hBn : B_d d η * B_d d μ ≥ 0 := by
+    apply mul_nonneg <;> (unfold B_d; nlinarith [show (d : ℝ) ≥ 1 from Nat.one_le_cast.mpr hd])
+  rw [h1, h3, Real.mul_self_sqrt hBn.le, h2]
 
+/-
+Weight triple product invariance: w.2.1 * w.2.2 = w_sym.2.1 ^ 2.
+-/
+lemma weight_prod_sym_eq (Δ d : ℕ) (hd : 1 ≤ d) (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
+    let K := Real.sqrt (B_d d η * B_d d μ)
+    let w := weight_triple Δ d η μ
+    let w_sym := weight_triple Δ d (K_to_η d K) (K_to_η d K)
+    w.2.1 * w.2.2 = w_sym.2.1 ^ 2 := by
+  -- By definition of weight_triple, we have:
+  unfold weight_triple;
+  simp +zetaDelta at *;
+  rw [ sq, div_mul_div_comm, div_mul_div_comm ];
+  rw [ B_d_K_to_η ];
+  · rw [ ← Real.mul_rpow ( Real.sqrt_nonneg _ ) ( Real.sqrt_nonneg _ ), Real.mul_self_sqrt ( mul_nonneg ( show 0 ≤ B_d d η by exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) hη ) zero_le_one ) ( show 0 ≤ B_d d μ by exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) hμ ) zero_le_one ) ) ];
+    rw [ Ad_next_sym_eq d hd η μ hη hμ, Real.mul_rpow ( by exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) hη ) zero_le_one ) ( by exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) hμ ) zero_le_one ) ] ; ring;
+  · linarith
 
-/--
+/-
+The weight triple components are positive when η, μ ≥ 0.
+-/
+lemma weight_triple_pos (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
+    (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
+    (weight_triple Δ d η μ).2.1 > 0 ∧ (weight_triple Δ d η μ).2.2 > 0 := by
+  unfold weight_triple;
+  unfold A_d B_d;
+  simp +zetaDelta at *;
+  exact ⟨ by positivity, by positivity ⟩
+
+/-
+The weight triple product < 1 when η + μ > 0.
+-/
+lemma weight_prod_lt_one (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
+    (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) (hpos : η + μ > 0) :
+    (weight_triple Δ d η μ).2.1 * (weight_triple Δ d η μ).2.2 < 1 := by
+  unfold weight_triple;
+  unfold B_d A_d; norm_num;
+  field_simp;
+  rw [ ← Real.rpow_natCast _ 2, ← Real.rpow_mul ( by positivity ) ] ; ring_nf;
+  rw [ ← Real.mul_rpow ( by positivity ) ( by positivity ) ] ; ring_nf;
+  refine' lt_of_lt_of_le _ ( Real.rpow_le_rpow_of_exponent_le _ <| show ( Δ : ℝ ) * ( 1 + d : ℝ ) ⁻¹ * 2 ≥ ( Δ : ℝ ) * ( d : ℝ ) ⁻¹ from _ );
+  · exact Real.rpow_lt_rpow ( by positivity ) ( by nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast, mul_nonneg hη hμ ] ) ( by positivity );
+  · nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast, mul_nonneg hη hμ ];
+  · field_simp;
+    norm_cast ; linarith
+
+/-
+When η = 0 and μ = 0, K_to_η d K = 0 where K = sqrt(B_d d 0 * B_d d 0).
+-/
+lemma K_to_η_zero (d : ℕ) (hd : 1 ≤ d) :
+    K_to_η d (Real.sqrt (B_d d 0 * B_d d 0)) = 0 := by
+  unfold K_to_η B_d; norm_num;
+
+/-
 The gap w₀ - Φ_Δ(w₁, w₂) is bounded below by the symmetric gap.
 Matches page 10.
-
-PROVIDED SOLUTION
-USE THE FOLLOWING MODULAR PROOF STRATEGY:
-
-  1. GEOMETRIC MEAN INVARIANT:
-     - Let B := B_d d μ and C := B_d d η. Fix the product BC = K²[cite: 198, 647].
-     - Note that w.2.1 * w.2.2 depends only on K, so the product of the weights
-       is invariant under the transformation Keᵗ and Ke⁻ᵗ.
-
-  2. GAP ANALYSIS VIA DERIVATIVES:
-     - Define the gap function f(t) = w₀ - (w₁ + w₂)/Δ as in 'deriv_weight_difference'.
-     - Invoke 'weight_diff_monotone' to establish that f(t) is non-decreasing
-       for t ≥ 0[cite: 203, 652].
-     - Since the multivariate state corresponds to some t ≥ 0 and symmetry to t = 0,
-       conclude that the gap is minimized at symmetry: f(t) ≥ f(0)[cite: 205, 655].
-
-  3. BOUNDARY REDUCTION VIA LEMMA 3.5:
-     - Use 'Phi_upper_bound' (Lemma 3.5) to bound the dual function Φ_Δ:
-       Φ_Δ Δ w.2.1 w.2.2 ≤ Ψ_Δ Δ (w.2.1 * w.2.2) + (w.2.1 + w.2.2) / Δ[cite: 196, 645].
-     - This implies the inequality:
-       w.1 - Φ_Δ Δ w.2.1 w.2.2 ≥ w.1 - (w.2.1 + w.2.2) / Δ - Ψ_Δ Δ (w.2.1 * w.2.2)[cite: 205, 656].
-
-  4. SYMMETRIC MATCHING:
-     - Invoke 'dual_gap_minimized_at_symmetry' to show the RHS is exactly
-       minimized when B = C, which is achieved by (K_to_η d K)[cite: 199, 648].
-     - Use the 'moreover' equality case of Lemma 3.5 for a₁ = a₂ to show that
-       at symmetry, Φ_Δ Δ w_sym.1 w_sym.2 matches the bound exactly[cite: 184, 616].
-
-  5. FINAL COMPARISON:
-     - Combine the functional minimum from Step 2 with the boundary equality
-       from Step 4 to close the goal[cite: 206, 658].
 -/
 lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
     (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
@@ -444,7 +475,36 @@ lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 
     let K := (B_d d η * B_d d μ).sqrt
     let w_sym := weight_triple Δ d (K_to_η d K) (K_to_η d K)
     w.1 - Φ_Δ Δ w.2.1 w.2.2 ≥ w_sym.1 - Φ_Δ Δ w_sym.2.1 w_sym.2.2 := by
-  sorry
+  by_cases h₃ : η + μ > 0 <;> simp_all +decide [ Phi_upper_bound,weight_triple ];
+  · -- By definition of $w_sym$, we know that $w_sym.1 = w.1$ and $w_sym.2.1 = w.2.1$.
+    have hw_sym : (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.1 * (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.2 = (weight_triple Δ d η μ).2.1 * (weight_triple Δ d η μ).2.2 := by
+      convert weight_prod_sym_eq Δ d hd η μ hη hμ |> Eq.symm using 1;
+      unfold weight_triple; ring;
+    have hw_sym_eq : Φ_Δ Δ (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.1 (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.2 = Psi_Delta Δ hΔ ( (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.1 * (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.2 ) (by
+    exact hw_sym.symm ▸ mul_pos ( weight_triple_pos Δ d hΔ hd hd_le η μ hη hμ |>.1 ) ( weight_triple_pos Δ d hΔ hd hd_le η μ hη hμ |>.2 )) (by
+    exact hw_sym.symm ▸ weight_prod_lt_one Δ d hΔ hd hd_le η μ hη hμ h₃) + ( (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.1 + (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.2 ) / Δ := by
+      apply (Phi_upper_bound Δ hΔ (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.1 (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.2 (by
+      exact weight_triple_pos Δ d hΔ hd hd_le _ _ ( by
+        exact div_nonneg ( sub_nonneg.2 <| Real.le_sqrt_of_sq_le <| by unfold B_d; nlinarith [ mul_nonneg ( Nat.cast_nonneg d ) hη, mul_nonneg ( Nat.cast_nonneg d ) hμ ] ) <| Nat.cast_nonneg _; ) ( by
+        exact div_nonneg ( sub_nonneg.2 <| Real.le_sqrt_of_sq_le <| by unfold B_d; nlinarith [ mul_nonneg ( Nat.cast_nonneg d ) hη, mul_nonneg ( Nat.cast_nonneg d ) hμ ] ) <| Nat.cast_nonneg _; ) |>.1) (by
+      apply (weight_triple_pos Δ d hΔ hd hd_le (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (by
+      exact div_nonneg ( sub_nonneg.2 <| Real.le_sqrt_of_sq_le <| by unfold B_d; nlinarith [ mul_nonneg ( Nat.cast_nonneg d ) hη, mul_nonneg ( Nat.cast_nonneg d ) hμ ] ) <| Nat.cast_nonneg _;) (by
+      exact div_nonneg ( sub_nonneg.2 <| Real.le_sqrt_of_sq_le <| by unfold B_d; nlinarith [ mul_nonneg ( Nat.cast_nonneg d ) hη, mul_nonneg ( Nat.cast_nonneg d ) hμ ] ) <| Nat.cast_nonneg _;)).right) (by
+      exact hw_sym.symm ▸ weight_prod_lt_one Δ d hΔ hd hd_le η μ hη hμ h₃)).right
+      generalize_proofs at *;
+      unfold weight_triple; aesop;
+    generalize_proofs at *;
+    have hw_sym_eq : Φ_Δ Δ (weight_triple Δ d η μ).2.1 (weight_triple Δ d η μ).2.2 ≤ Psi_Delta Δ hΔ ( (weight_triple Δ d η μ).2.1 * (weight_triple Δ d η μ).2.2 ) (by
+    linarith) (by
+    linarith) + ( (weight_triple Δ d η μ).2.1 + (weight_triple Δ d η μ).2.2 ) / Δ := by
+      apply (Phi_upper_bound Δ hΔ (weight_triple Δ d η μ).2.1 (weight_triple Δ d η μ).2.2 (by
+      exact weight_triple_pos Δ d hΔ hd hd_le η μ hη hμ |>.1) (by
+      exact weight_triple_pos Δ d hΔ hd hd_le η μ hη hμ |>.2) (by
+      linarith)).left
+    generalize_proofs at *;
+    have := dual_gap_minimized_at_symmetry Δ d hΔ hd hd_le η μ hη hμ; simp_all +decide [ weight_triple ] ;
+    grind;
+  · norm_num [ show η = 0 by linarith, show μ = 0 by linarith, A_d, B_d, K_to_η ]
 
 /-
 **Lemma 3.3** `lem:Sn-membership-separately`
