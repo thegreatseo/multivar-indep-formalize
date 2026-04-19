@@ -33,7 +33,7 @@ lemma x_k_spec (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 ≤ s) (hks : k = 1 �
     x_k k hk s hs hks ≥ 0 ∧ (H_k k (x_k k hk s hs hks)) ^ (1 / (k : ℝ)) = s :=
   Classical.choose_spec (exists_unique_x_k k hk s hs hks).exists
 
-lemma H_k_le_lin (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (hx : 0 ≤ x) :
+lemma H_k_le_lin (k : ℕ) (_hk : 1 ≤ k) (x : ℝ) (hx : 0 ≤ x) :
   H_k k x ≤ 1 + k * x := by
     rw [ H_k_eq, div_le_iff₀ ] <;> nlinarith [ show ( k : ℝ ) ≥ 1 by norm_cast ]
 
@@ -88,7 +88,7 @@ lemma term_nonneg (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (x : ℝ) (h
   d * (d + 1) * s * x^2 * (s * x - s + 1) ≥ 0 := by
     exact mul_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( by positivity ) ) ( by positivity ) ) ( sq_nonneg _ ) ) ( by nlinarith [ sq_nonneg ( s - 1 ) ] )
 
-lemma Num_poly_rel (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (x : ℝ) (hx : x ≥ 0)
+lemma Num_poly_rel (d : ℕ) (_hd : 1 ≤ d) (s : ℝ) (_hs : 1 ≤ s) (x : ℝ) (hx : x ≥ 0)
   (hH : H_k d x = s ^ d) :
   Num_poly d s x = (d * x + 1) * ((d * (d + 1) * s^2 * x^2 + 2 * (d + 1) * s * x + 1) - s^(d+1) * ((d + 1) * s * x + 1)) := by
     -- Substitute the expression for the numerator of $H_k(x)$ from $hH$.
@@ -105,7 +105,7 @@ lemma Num_poly_nonneg (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (x : ℝ
   linarith
 
 lemma H_d_plus_one_ge_s_pow_d_plus_one (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (x : ℝ) (hx : x ≥ s - 1)
-  (hH : H_k d x = s ^ d) (hQ : Q_poly d s x ≥ 0) :
+  (hH : H_k d x = s ^ d) (_hQ : Q_poly d s x ≥ 0) :
   H_k (d + 1) (s * x) ≥ s ^ (d + 1) := by
     -- By definition of $H_k$, we know that $H_k (d + 1) (s * x) = \frac{(d + 1) * d * (s * x)^2 + 2 * (d + 1) * (s * x) + 1}{(d + 1) * (s * x) + 1}$.
     have hH_def : H_k (d + 1) (s * x) = ((d + 1) * d * (s * x)^2 + 2 * (d + 1) * (s * x) + 1) / ((d + 1) * (s * x) + 1) := by

@@ -1,6 +1,15 @@
-import Mathlib
-import MultivarIndepFormalize.Definitions
+import MultivarIndepFormalize.Basic
 import MultivarIndepFormalize.DualSetMembership
+
+/-!
+# Neighborhood reduction helpers
+
+Helper lemmas for the inductive step of the main theorem, including:
+- Degree computations in induced subgraphs
+- Product splitting over neighbor/non-neighbor partitions
+- S_d membership inequalities applied to neighborhood products
+- The neighborhood reduction for Δ = 0, 1, and ≥ 2
+-/
 
 set_option linter.style.longLine false
 set_option linter.mathlibStandardSet false
@@ -15,24 +24,6 @@ set_option synthInstance.maxSize 128
 variable {V : Type} [Fintype V] [DecidableEq V] (G : SimpleGraph V) [DecidableRel G.Adj]
 
 noncomputable section
-
-/-! ## A_d / B_d identities -/
-
-lemma A_d_zero_left (d : ℕ) (μ : ℝ) : A_d d 0 μ = B_d d μ := by
-  unfold A_d B_d; ring
-
-lemma A_d_zero_right (d : ℕ) (η : ℝ) : A_d d η 0 = B_d d η := by
-  unfold A_d B_d; ring
-
-lemma A_d_pos (d : ℕ) (η μ : ℝ) (hη : 0 ≤ η) (hμ : 0 ≤ μ) : 0 < A_d (d + 1) η μ := by
-  unfold A_d
-  have hd : (d : ℝ) ≥ 0 := Nat.cast_nonneg d
-  have : ((d : ℝ) + 1) * ((d : ℝ) + 1 - 1) = (d + 1) * d := by ring
-  rw [show (↑(d + 1) : ℝ) = (d : ℝ) + 1 from by push_cast; ring]
-  nlinarith [mul_nonneg hη hμ, mul_nonneg hd hη, mul_nonneg hd hμ, mul_nonneg hd (mul_nonneg hη hμ)]
-
-lemma B_d_pos (d : ℕ) (η : ℝ) (hη : 0 ≤ η) : 0 < B_d (d + 1) η := by
-  unfold B_d; positivity
 
 /-! ## Degree in induced subgraphs -/
 
@@ -108,7 +99,7 @@ lemma Sd_membership_product_ineq (Δ : ℕ) (hΔ : Δ ≥ 2)
   have := SΔ_membership Δ hΔ d hd η μ hη hμ;
   have := this.2.2.2 x y hx hy;
   rw [ Finset.prod_div_distrib, Finset.prod_div_distrib, Finset.prod_div_distrib ] at this;
-  rw [ div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, ← add_div, ge_iff_le, le_div_iff₀ ] at this <;> first | linarith | simp_all +decide [ Finset.prod_eq_zero_iff ] ;
+  rw [ div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, ← add_div, ge_iff_le, le_div_iff₀ ] at this <;> first | linarith | simp_all +decide ;
   exact Finset.prod_pos fun i _ => Real.rpow_pos_of_pos ( A_d_pos _ _ _ ( hη i ) ( hμ i ) ) _
 
 /-
@@ -163,8 +154,8 @@ lemma neighbor_prod_h2_eq (w : V) (η μ : V → ℝ) :
   · aesop;
   · aesop;
   · simp +decide [ B_d ];
-    intro a ha h; rw [ if_pos h ] ; rw [ induce_degree_adj _ _ _ h ] ; ring;
-    rw [ Nat.cast_sub ( by linarith [ G.degree_pos_iff_exists_adj a |>.2 ⟨ w, h.symm ⟩ ] ) ] ; ring;
+    intro a ha h; rw [ if_pos h ] ; rw [ induce_degree_adj _ _ _ h ] ; ring_nf
+    rw [ Nat.cast_sub ( by linarith [ G.degree_pos_iff_exists_adj a |>.2 ⟨ w, h.symm ⟩ ] ) ] ; ring_nf
     aesop
 
 /-
@@ -180,7 +171,7 @@ lemma neighbor_prod_h3_eq (w : V) (η μ : V → ℝ) :
   refine' Finset.prod_bij ( fun v hv => v ) _ _ _ _ <;> simp_all +decide [ SimpleGraph.degree, SimpleGraph.neighborFinset ];
   · exact fun v hv => hv.ne.symm;
   · intro a ha h; rw [ show ( Finset.filter ( fun x : { x : V // x ≠ w } => G.Adj a x ) Finset.univ ).card = Finset.card ( Finset.filter ( fun x : V => G.Adj a x ) Finset.univ ) - 1 from ?_ ] ; simp +decide [ *, B_d ] ;
-    · rcases n : Finset.card ( Finset.filter ( fun x => G.Adj a x ) Finset.univ ) with ( _ | _ | n ) <;> simp_all +decide [ Nat.succ_eq_add_one ];
+    · rcases n : Finset.card ( Finset.filter ( fun x => G.Adj a x ) Finset.univ ) with ( _ | _ | n ) <;> simp_all +decide;
       exact False.elim <| n <| h.symm;
     · rw [ ← Finset.card_erase_of_mem ( Finset.mem_filter.mpr ⟨ Finset.mem_univ w, h.symm ⟩ ) ] ; rw [ ← Finset.card_image_of_injective _ Subtype.coe_injective ] ; congr ; ext ; aesop;
 
@@ -216,6 +207,7 @@ lemma non_neighbor_prod_h3_eq (w : V) (η μ : V → ℝ) :
 The S_d membership inequality applied to products over the neighborFinset.
 Converts from Finset-indexed products to Fin-indexed products and applies Sd_membership_product_ineq.
 -/
+omit [Fintype V] [DecidableEq V] in
 lemma Sd_membership_finset_ineq (Δ : ℕ) (hΔ : Δ ≥ 2)
     (S : Finset V) (hS : S.card = Δ)
     (d : V → ℕ) (hd : ∀ v ∈ S, 1 ≤ d v ∧ d v ≤ Δ)
@@ -278,7 +270,7 @@ lemma neighborhood_reduction_delta_zero (w : V) (η μ : V → ℝ) (hη : 0 ≤
   · congr! 1;
     · refine' Finset.prod_bij ( fun x hx => ⟨ x, by aesop ⟩ ) _ _ _ _ <;> simp +decide [ SimpleGraph.degree, SimpleGraph.neighborFinset ];
       intro a ha; rw [ Finset.card_filter, Finset.card_filter ] ;
-      rw [ ← Finset.sum_subset ( Finset.subset_univ ( Finset.image ( fun x : { x : V // ¬x = w } => x.val ) Finset.univ ) ) ] <;> simp +decide [ Finset.sum_image, ha ];
+      rw [ ← Finset.sum_subset ( Finset.subset_univ ( Finset.image ( fun x : { x : V // ¬x = w } => x.val ) Finset.univ ) ) ] <;> simp +decide ;
       · rw [ Finset.card_filter, Finset.card_filter ];
         rw [ Finset.sum_image ] ; aesop;
       · exact fun h => hΔ h.symm;
@@ -354,7 +346,7 @@ lemma neighborhood_reduction_delta_one (w : V) (η μ : V → ℝ) (hη : 0 ≤ 
   have hv₀_adj : G.Adj w v₀ := by
     replace hv₀ := Finset.ext_iff.mp hv₀ v₀; aesop;
   have hv₀_not_adj : ∀ u, u ≠ w → u ≠ v₀ → ¬G.Adj w u := by
-    intro u hu₁ hu₂ hu₃; replace hv₀ := Finset.ext_iff.mp hv₀ u; simp_all +decide [ SimpleGraph.adj_comm ] ;
+    intro u hu₁ hu₂ hu₃; replace hv₀ := Finset.ext_iff.mp hv₀ u; simp_all +decide ;
   have hv₀_deg_sub : (G.induce {x | x ≠ w}).degree ⟨v₀, by
     exact fun h => by subst h; exact hv₀_adj.ne rfl;⟩ = 0 := by
     simp +decide [ SimpleGraph.degree, SimpleGraph.neighborFinset ] at hv₀_deg ⊢;
@@ -385,12 +377,12 @@ lemma neighborhood_reduction_delta_one (w : V) (η μ : V → ℝ) (hη : 0 ≤ 
           congr! 1;
           · refine' Finset.prod_bij ( fun x hx => ⟨ x, by aesop ⟩ ) _ _ _ _ <;> simp +decide [ * ];
             · tauto;
-            · intro a ha hb; simp +decide [ ha, hb, hv₀_not_adj a ha hb ] ;
+            · intro a ha hb; simp +decide [ hv₀_not_adj a ha hb ] ;
               rw [ induce_degree_non_adj ] ; aesop;
           · aesop;
         · simp +decide [ Fintype.card_subtype_compl ];
           exact Fintype.card_pos_iff.mpr ⟨ w ⟩;
-        · exact fun x => by by_cases hx : G.Adj w x.val <;> simpa [ hx ] using hη x.val;
+        · exact fun x => by by_cases hx : G.Adj w x.val; all_goals simp [ hx ]; all_goals exact hη x.val;
         · exact fun _ => hμ _;
   have h_ind3 : Z_G_2 (induce {x | x ≠ w} G) (η ∘ Subtype.val) ((fun v => if G.Adj w v then 0 else μ v) ∘ Subtype.val) ≥
     (∏ v ∈ Finset.univ.erase w \ G.neighborFinset w,
@@ -405,7 +397,7 @@ lemma neighborhood_reduction_delta_one (w : V) (η μ : V → ℝ) (hη : 0 ≤ 
         · simp +decide [ Fintype.card_subtype_compl ];
           exact Fintype.card_pos_iff.mpr ⟨ w ⟩;
         · exact fun _ => hη _;
-        · exact fun x => by by_cases hx : G.Adj w x.val <;> simpa [ hx ] using hμ x.val;
+        · exact fun x => by by_cases hx : G.Adj w x.val; all_goals simp [ hx ]; all_goals exact hμ x.val;
   simp_all +decide [ Finset.prod_singleton, A_d ];
   refine le_trans ?_ ( add_le_add_three h_ind ( mul_le_mul_of_nonneg_left h_ind2 <| hη w ) ( mul_le_mul_of_nonneg_left h_ind3 <| hμ w ) ) ; ring_nf ; norm_num;
   rw [ ← Real.sqrt_eq_rpow, ← Real.sqrt_eq_rpow ];
@@ -436,7 +428,7 @@ lemma neighborhood_reduction_delta_ge_two (w : V) (η μ : V → ℝ) (hη : 0 �
       μ w * Z_G_2 (G.induce {x | x ≠ w}) (η ∘ Subtype.val) ((fun v => if G.Adj w v then 0 else μ v) ∘ Subtype.val) ≥
     remaining_prod * neighborhood_prod * (A_d (Δ' + 1) (η w) (μ w)) ^ (1 / ((Δ' : ℝ) + 1)) := by
   refine' le_trans _ ( add_le_add ( add_le_add ( h_ih _ _ _ _ _ _ _ ) ( mul_le_mul_of_nonneg_left ( h_ih _ _ _ _ _ _ _ ) ( hη _ ) ) ) ( mul_le_mul_of_nonneg_left ( h_ih _ _ _ _ _ _ _ ) ( hμ _ ) ) );
-  any_goals intro; simp +decide [ *, Pi.le_def ];
+  any_goals intro; simp +decide [ * ];
   any_goals exact hμ _;
   any_goals exact hη _;
   any_goals split_ifs <;> norm_num ; exact hμ _;
@@ -452,8 +444,8 @@ lemma neighborhood_reduction_delta_ge_two (w : V) (η μ : V → ℝ) (hη : 0 �
                           · exact hη v;
                           · exact hμ v;
     convert mul_le_mul_of_nonneg_left h_apply_ineq ( show 0 ≤ ∏ v ∈ Finset.univ.erase w \ G.neighborFinset w, ( ( ( G.degree v : ℝ ) + 1 ) * ( G.degree v : ℝ ) * η v * μ v + ( ( G.degree v : ℝ ) + 1 ) * ( η v + μ v ) + 1 ) ^ ( 1 / ( ( G.degree v : ℝ ) + 1 ) ) from ?_ ) using 1;
-    · unfold A_d; ring;
-      norm_num [ add_assoc, add_left_comm, add_comm ] ; ring;
+    · unfold A_d; ring_nf;
+      norm_num [ add_assoc, add_left_comm, add_comm ] ; ring_nf;
       ac_rfl;
     · rw [ mul_add, mul_add ];
       congr! 1;
@@ -476,12 +468,12 @@ lemma neighborhood_reduction_delta_ge_two (w : V) (η μ : V → ℝ) (hη : 0 �
           ext v; by_cases hv : G.Adj w v.val <;> simp +decide [ hv ] ;
         · exact Finset.disjoint_filter.mpr fun _ _ _ _ => by tauto;
     · grind +suggestions;
-  · simp +decide [ Finset.filter_ne' ];
+  · simp +decide;
     exact Fintype.card_pos_iff.mpr ⟨ w ⟩;
-  · simp +decide [ Finset.filter_ne' ];
+  · simp +decide;
     exact Fintype.card_pos_iff.mpr ⟨ w ⟩;
   · split_ifs <;> [ norm_num; exact hη _ ];
-  · simp +decide [ Finset.filter_ne' ];
+  · simp +decide;
     exact Fintype.card_pos_iff.mpr ⟨ w ⟩
 
 end

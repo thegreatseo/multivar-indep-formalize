@@ -1,5 +1,6 @@
 import MultivarIndepFormalize.Definitions
 
+set_option linter.style.longLine false
 set_option linter.mathlibStandardSet false
 
 set_option maxHeartbeats 0
@@ -16,6 +17,7 @@ noncomputable section
 /-
 An independent set in the induced graph G \ {w} corresponds to an independent set in G that does not contain w.
 -/
+omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
 lemma isIndepSet_image (w : V) (S' : Set {x // x ≠ w}) :
   G.IsIndepSet (S'.image Subtype.val) ↔ (G.induce {x | x ≠ w}).IsIndepSet S' := by
   simp +decide [ Set.Pairwise, SimpleGraph.IsIndepSet ]
@@ -43,7 +45,7 @@ lemma Z_G_2_term1 (w : V) (η μ : V → ℝ) :
   simp +decide [ Set.indicator ];
   rw [ ← Finset.sum_subset ( Finset.subset_univ ( Finset.image ( fun I : Set { x : V // ¬x = w } => I.image Subtype.val ) Finset.univ ) ) ];
   · rw [ Finset.sum_image ];
-    · refine' Finset.sum_congr rfl fun I _ => _;
+    · refine Finset.sum_congr rfl fun I _ => ?_;
       rw [ ← Finset.sum_subset ( Finset.subset_univ ( Finset.image ( fun J : Set { x : V // ¬x = w } => J.image Subtype.val ) Finset.univ ) ) ];
       · rw [ Finset.sum_image ];
         · simp +decide [ Set.disjoint_left, SimpleGraph.IsIndepSet ];
@@ -87,24 +89,24 @@ lemma Z_G_2_term2 (w : V) (η μ : V → ℝ) :
     -- By definition of $Z_G_2$, we can split the sum into two parts: one where $w \in I$ and one where $w \notin I$.
     have h_split : ∑ I : Set V, ∑ J : Set V, (if G.IsIndepSet I ∧ G.IsIndepSet J ∧ Disjoint I J ∧ w ∈ I then (∏ v ∈ I.toFinset, η v) * (∏ u ∈ J.toFinset, μ u) else 0) =
                    ∑ I : Set V, ∑ J : Set V, (if G.IsIndepSet I ∧ G.IsIndepSet J ∧ Disjoint I J ∧ w ∈ I then η w * (∏ v ∈ (I \ {w}).toFinset, η v) * (∏ u ∈ J.toFinset, μ u) else 0) := by
-                     refine' Finset.sum_congr rfl fun I hI => Finset.sum_congr rfl fun J hJ => _;
-                     split_ifs <;> simp_all +decide [ Finset.prod_eq_mul_prod_diff_singleton ( Set.mem_toFinset.mpr ‹_› ) ];
+                     refine Finset.sum_congr rfl fun I hI => Finset.sum_congr rfl fun J hJ => ?_;
+                     split_ifs <;> simp_all +decide;
                      exact Or.inl ( by rw [ Finset.prod_eq_mul_prod_diff_singleton ( Set.mem_toFinset.mpr ( by tauto ) ) ] );
     rw [ h_split, Finset.mul_sum _ _ _ ];
     rw [ ← Finset.sum_subset ( Finset.subset_univ ( Finset.image ( fun I : Set { x : V // ¬x = w } => Insert.insert w ( I.image Subtype.val ) ) Finset.univ ) ) ];
     · rw [ Finset.sum_image ];
-      · refine' Finset.sum_congr rfl fun I _ => _;
+      · refine Finset.sum_congr rfl fun I _ => ?_;
         rw [ Finset.mul_sum _ _ _ ];
         rw [ ← Finset.sum_subset ( Finset.subset_univ ( Finset.image ( fun J : Set { x : V // ¬x = w } => J.image Subtype.val ) Finset.univ ) ) ];
         · rw [ Finset.sum_image ];
-          · refine' Finset.sum_congr rfl fun J _ => _;
+          · refine Finset.sum_congr rfl fun J _ => ?_;
             simp +decide [ Set.disjoint_left, Set.mem_insert_iff, Set.mem_image, Finset.prod_ite ];
             field_simp;
             split_ifs <;> simp_all +decide [ SimpleGraph.isIndepSet_iff, Finset.prod_filter ];
             · rw [ Finset.card_eq_zero.mpr ] <;> simp +decide [ *, Finset.prod_ite ];
               · rw [ mul_right_comm, Finset.prod_filter ];
-                refine' congr rfl ( Finset.prod_congr rfl fun x hx => _ );
-                split_ifs <;> simp_all +decide [ SimpleGraph.adj_comm ];
+                refine congr rfl ( Finset.prod_congr rfl fun x hx => ?_ );
+                split_ifs <;> simp_all +decide;
                 rename_i h₁ h₂ h₃;
                 exact False.elim ( h₁.1 ( Set.mem_insert _ _ ) ( Set.mem_insert_of_mem _ ( Set.mem_image_of_mem _ hx ) ) ( by aesop ) h₃ );
               · intro a ha haI; have := ‹ ( ( Insert.insert w ( Subtype.val '' I ) ).Pairwise fun v w => ¬G.Adj v w ) ∧ ( Subtype.val '' J ).Pairwise fun v w => ¬G.Adj v w ›.1 ( Set.mem_insert _ _ ) ( Set.mem_insert_of_mem _ ( Set.mem_image_of_mem _ haI ) ) ; aesop;
@@ -146,7 +148,7 @@ lemma Z_G_2_term3 (w : V) (η μ : V → ℝ) :
   · rw [ Finset.sum_comm ];
     simp +decide only [disjoint_comm, mul_comm];
     simp +decide only [and_left_comm];
-  · unfold Z_G_2; ring;
+  · unfold Z_G_2; ring_nf;
     rw [ Finset.sum_comm ];
     congr! 3;
     simp +decide only [disjoint_comm, and_comm];
@@ -175,6 +177,6 @@ lemma semiproper_poly_recurrence (η μ : V → ℝ) (w : V) :
       μ w * Z_G_2 G_minus_w η_rest μ_sub := by
   convert congr_arg₂ ( · + · ) ( congr_arg₂ ( · + · ) ( Z_G_2_term1 G w η μ ) ( Z_G_2_term2 G w η μ ) ) ( Z_G_2_term3 G w η μ ) using 1;
   simp +decide only [← Finset.sum_add_distrib];
-  refine' Finset.sum_congr rfl fun I _ => Finset.sum_congr rfl fun J _ => _;
+  refine Finset.sum_congr rfl fun I _ => Finset.sum_congr rfl fun J _ => ?_;
   by_cases hI : w ∈ I <;> by_cases hJ : w ∈ J <;> simp +decide [ hI, hJ ];
   exact fun hI' hJ' hIJ => False.elim ( hIJ.le_bot ⟨ hI, hJ ⟩ )

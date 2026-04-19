@@ -35,8 +35,8 @@ lemma Sd_geometric_mean (Δ : ℕ) (hΔ : Δ ≥ 2) (v : Fin Δ → ℝ × ℝ �
           have h_sum : ∑ i : Fin Δ, (1 / (Δ : ℝ)) = 1 := by
             norm_num [ show Δ ≠ 0 by linarith ];
           convert h_log_convex.sum_mem _ _ _ <;> aesop;
-        convert h_convex_comb _ h_log_v using 1 ; norm_num [ Prod.ext_iff ];
-        induction' ( Finset.univ : Finset ( Fin Δ ) ) using Finset.induction <;> aesop;
+        convert h_convex_comb _ h_log_v using 1 ; norm_num [ Prod.ext_iff ]
+        induction ( Finset.univ : Finset ( Fin Δ ) ) using Finset.induction <;> aesop
       obtain ⟨ w, hw, hw' ⟩ := h_log_sum;
       convert hw using 1;
       -- By definition of exponentiation, we can rewrite the products as exponentials of sums.
@@ -92,7 +92,7 @@ lemma SΔ_membership (Δ : ℕ) (hΔ : Δ ≥ 2)
   convert this ( fun i => ( A_d ( d i ) ( η i ) ( μ i ) ^ ( Δ / ( d i : ℝ ) ) / A_d ( d i + 1 ) ( η i ) ( μ i ) ^ ( Δ / ( d i + 1 : ℝ ) ), B_d ( d i ) ( μ i ) ^ ( Δ / ( d i : ℝ ) ) / A_d ( d i + 1 ) ( η i ) ( μ i ) ^ ( Δ / ( d i + 1 : ℝ ) ), B_d ( d i ) ( η i ) ^ ( Δ / ( d i : ℝ ) ) / A_d ( d i + 1 ) ( η i ) ( μ i ) ^ ( Δ / ( d i + 1 : ℝ ) ) ) ) _ using 1;
   · norm_num [ Real.rpow_def_of_pos, div_eq_mul_inv ];
     congr! 2;
-    · refine' Finset.prod_congr rfl fun i _ => _;
+    · refine Finset.prod_congr rfl fun i _ => ?_
       rw [ Real.mul_rpow, ← Real.rpow_neg, ← Real.rpow_mul, ← Real.rpow_neg, ← Real.rpow_mul ] <;> norm_num [ show Δ ≠ 0 by linarith ];
       · field_simp;
       all_goals unfold A_d; norm_num [ hη, hμ ];
@@ -103,16 +103,17 @@ lemma SΔ_membership (Δ : ℕ) (hΔ : Δ ≥ 2)
       · exact Real.rpow_nonneg ( by nlinarith [ hη i, hμ i, show ( d i : ℝ ) ≥ 1 by exact_mod_cast hd i |>.1, show ( d i : ℝ ) ≤ Δ by exact_mod_cast hd i |>.2, mul_nonneg ( hη i ) ( hμ i ), mul_nonneg ( show ( d i : ℝ ) ≥ 0 by positivity ) ( hη i ), mul_nonneg ( show ( d i : ℝ ) ≥ 0 by positivity ) ( hμ i ) ] ) _;
     · field_simp;
       congr! 1;
-      · refine' Finset.prod_congr rfl fun i _ => _;
-        rw [ Real.div_rpow ];
+      · refine Finset.prod_congr rfl fun i _ => ?_
+        rw [ Real.div_rpow ]
         · rw [ ← Real.rpow_mul, ← Real.rpow_mul ] <;> ring_nf <;> norm_num [ show Δ ≠ 0 by linarith ];
           · exact add_nonneg ( add_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( by positivity ) ( by norm_num ) ) ( by linarith [ hη i, hμ i ] ) ) ( by linarith [ hη i, hμ i ] ) ) ( mul_nonneg ( by linarith [ hd i ] ) ( by linarith [ hη i, hμ i ] ) ) ) zero_le_one;
           · exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( hμ i ) ) zero_le_one;
         · exact Real.rpow_nonneg ( by unfold B_d; exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( hμ _ ) ) zero_le_one ) _;
         · exact Real.rpow_nonneg ( by exact add_nonneg ( add_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( by positivity ) ( by norm_num ) ) ( hη i ) ) ( hμ i ) ) ( mul_nonneg ( by positivity ) ( add_nonneg ( hη i ) ( hμ i ) ) ) ) zero_le_one ) _;
-      · refine' Finset.prod_congr rfl fun i _ => _;
-        rw [ Real.div_rpow ( Real.rpow_nonneg ( _ ) _ ) ( Real.rpow_nonneg ( _ ) _ ), ← Real.rpow_mul ( _ ), ← Real.rpow_mul ( _ ) ] ; ring_nf;
-        · norm_num [ show Δ ≠ 0 by linarith ];
+      · refine Finset.prod_congr rfl fun i _ => ?_
+        rw [ Real.div_rpow ( Real.rpow_nonneg ( _ ) _ ) ( Real.rpow_nonneg ( _ ) _ ),
+          ← Real.rpow_mul ( _ ), ← Real.rpow_mul ( _ ) ]
+        · ring_nf; norm_num [ show Δ ≠ 0 by linarith ];
         · exact add_nonneg ( add_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( by positivity ) ( by norm_num ) ) ( by linarith [ hη i, hμ i ] ) ) ( by linarith [ hη i, hμ i ] ) ) ( mul_nonneg ( by positivity ) ( by linarith [ hη i, hμ i ] ) ) ) zero_le_one;
         · exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( hη i ) ) zero_le_one;
         · exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( hη i ) ) zero_le_one;

@@ -40,6 +40,7 @@ lemma H_k_deriv (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (hx : x ≥ 0) :
 /-
 Algebraic identity required for the derivative of x_k(s).
 -/
+set_option linter.unusedVariables false in
 lemma deriv_x_k_algebraic_identity (k : ℕ) (hk : 1 ≤ k) (x s : ℝ) (hx : 0 ≤ x) (hs : 0 < s)
     (h_eq : H_k k x = s ^ k) :
     k * s ^ (k - 1) / (k * (k * (k - 1) * x ^ 2 + 2 * (k - 1) * x + 1) / (k * x + 1) ^ 2) =
@@ -158,7 +159,7 @@ lemma g_iso_symm_continuous (k : ℕ) (hk : 1 ≤ k) : Continuous (g_iso k hk).s
         infer_instance;
       rcases k with ( _ | _ | k ) <;> norm_num at *;
       · rw [ show DomainK 1 = Set.Ico 1 2 from ?_ ];
-        · exact?;
+        · infer_instance;
         · ext; simp [DomainK];
       · convert h_order_top using 1;
         · congr with x ; simp +decide [ DomainK ];
@@ -168,8 +169,8 @@ lemma g_iso_symm_continuous (k : ℕ) (hk : 1 ≤ k) : Continuous (g_iso k hk).s
           ext; simp [DomainK]
     have h_subspace_range : OrderTopology (RangeK) := by
       simp [RangeK];
-      exact?
-    exact?;
+      infer_instance
+    exact OrderIso.continuous (g_iso k hk).symm;
   exact h_iso_cont
 
 /-
@@ -181,7 +182,7 @@ lemma x_k_ext_continuousOn_DomainK (k : ℕ) (hk : 1 ≤ k) :
     have h_restrict : Set.restrict (DomainK k) (x_k_ext k hk) = (fun t => ((g_iso k hk).symm t).val) ∘ (fun t => ⟨t, t.2⟩ : ↥(DomainK k) → ↥(DomainK k)) := by
       exact funext fun x => x_k_ext_eq_iso_symm k hk x x.2;
     convert h_restrict.symm ▸ Continuous.comp _ _ using 1;
-    · exact?;
+    · exact continuousOn_iff_continuous_restrict;
     · exact Continuous.comp ( continuous_subtype_val ) ( g_iso_symm_continuous k hk );
     · fun_prop (disch := solve_by_elim)
 

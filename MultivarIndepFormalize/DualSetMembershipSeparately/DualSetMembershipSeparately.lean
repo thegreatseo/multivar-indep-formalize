@@ -118,7 +118,7 @@ lemma A_d_K_to_η (d : ℕ) (hd : 1 ≤ d) (K : ℝ) :
   field_simp
   ring
 
-lemma weight_diff_inequalities (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
+lemma weight_diff_inequalities (Δ d : ℕ) (_hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
     (K : ℝ) (hK : K > 0) (t : ℝ) (ht : t ∈ Set.Icc 0 (Real.log K)) :
     let p := (Δ : ℝ) / (d : ℝ)
     let B := K * Real.exp t
@@ -223,7 +223,7 @@ lemma weight_diff_fun_aux_ineqs (d : ℕ) (hd : 1 ≤ d) (K : ℝ) (t : ℝ)
 /-
 The derivative factor of the weight difference function is non-negative.
 -/
-lemma weight_diff_deriv_factor_nonneg (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
+lemma weight_diff_deriv_factor_nonneg (Δ d : ℕ) (_hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
     (K : ℝ) (hK : K ≥ 1) (t : ℝ) (ht : 0 ≤ t) (hC : K * Real.exp (-t) ≥ 1) :
     let p := (Δ : ℝ) / (d : ℝ)
     let B := K * Real.exp t
@@ -293,7 +293,7 @@ lemma A_d_eq_of_Bd (d : ℕ) (hd : d ≠ 0) (η μ : ℝ) :
 /-
 The weight difference expression equals the weight difference function.
 -/
-lemma weight_triple_diff_eq_fun (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d)
+lemma weight_triple_diff_eq_fun (Δ d : ℕ) (_hΔ : Δ ≥ 2) (hd : 1 ≤ d)
     (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
     let s := B_d d η * B_d d μ
     let K := Real.sqrt s
@@ -433,7 +433,7 @@ lemma weight_prod_sym_eq (Δ d : ℕ) (hd : 1 ≤ d) (η μ : ℝ) (hη : η ≥
 /-
 The weight triple components are positive when η, μ ≥ 0.
 -/
-lemma weight_triple_pos (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
+lemma weight_triple_pos (Δ d : ℕ) (_hΔ : Δ ≥ 2) (hd : 1 ≤ d) (_hd_le : d ≤ Δ)
     (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) :
     (weight_triple Δ d η μ).2.1 > 0 ∧ (weight_triple Δ d η μ).2.2 > 0 := by
   unfold weight_triple;
@@ -444,7 +444,7 @@ lemma weight_triple_pos (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d 
 /-
 The weight triple product < 1 when η + μ > 0.
 -/
-lemma weight_prod_lt_one (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
+lemma weight_prod_lt_one (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (_hd_le : d ≤ Δ)
     (η μ : ℝ) (hη : η ≥ 0) (hμ : μ ≥ 0) (hpos : η + μ > 0) :
     (weight_triple Δ d η μ).2.1 * (weight_triple Δ d η μ).2.2 < 1 := by
   unfold weight_triple;
@@ -461,7 +461,7 @@ lemma weight_prod_lt_one (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d
 /-
 When η = 0 and μ = 0, K_to_η d K = 0 where K = sqrt(B_d d 0 * B_d d 0).
 -/
-lemma K_to_η_zero (d : ℕ) (hd : 1 ≤ d) :
+lemma K_to_η_zero (d : ℕ) (_hd : 1 ≤ d) :
     K_to_η d (Real.sqrt (B_d d 0 * B_d d 0)) = 0 := by
   unfold K_to_η B_d; norm_num;
 
@@ -475,7 +475,7 @@ lemma multivariate_reduction_to_symmetric (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 
     let K := (B_d d η * B_d d μ).sqrt
     let w_sym := weight_triple Δ d (K_to_η d K) (K_to_η d K)
     w.1 - Φ_Δ Δ w.2.1 w.2.2 ≥ w_sym.1 - Φ_Δ Δ w_sym.2.1 w_sym.2.2 := by
-  by_cases h₃ : η + μ > 0 <;> simp_all +decide [ Phi_upper_bound,weight_triple ];
+  by_cases h₃ : η + μ > 0 <;> simp_all +decide [weight_triple];
   · -- By definition of $w_sym$, we know that $w_sym.1 = w.1$ and $w_sym.2.1 = w.2.1$.
     have hw_sym : (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.1 * (weight_triple Δ d (K_to_η d (Real.sqrt (B_d d η * B_d d μ))) (K_to_η d (Real.sqrt (B_d d η * B_d d μ)))).2.2 = (weight_triple Δ d η μ).2.1 * (weight_triple Δ d η μ).2.2 := by
       convert weight_prod_sym_eq Δ d hd η μ hη hμ |> Eq.symm using 1;

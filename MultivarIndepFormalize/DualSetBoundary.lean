@@ -6,8 +6,7 @@
 f has a unique zero ξ on (1,∞).
 -/
 
-import MultivarIndepFormalize.Definitions
-import MultivarIndepFormalize.TechnicalLemmas
+import MultivarIndepFormalize.Concavity
 
 set_option linter.mathlibStandardSet false
 set_option linter.style.longLine false
@@ -135,7 +134,7 @@ def Psi_Delta (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs₀ : 0 < s) (hs₁ : s <
 The critical point (x_*, y_*) defined in (3.8) satisfies A_{Δ+1}(x_*, y_*) = ξ^{Δ+1}
 and lies within the convex domain Ω. Matches page 9.
 -/
-lemma critical_point_in_Ω (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha₁ : 0 < a₁) (ha₂ : 0 < a₂)
+lemma critical_point_in_Ω (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha₁ : 0 < a₁) (_ha₂ : 0 < a₂)
     (ξ : ℝ) (hξ : 1 < ξ) (h_root : (Δ + 1 : ℝ) * (a₁ * a₂) * ξ ^ (2 * Δ) - Δ * ξ ^ (Δ + 1) - 1 = 0) :
     let x_star := (a₂ * ξ ^ Δ - 1) / Δ
     let y_star := (a₁ * ξ ^ Δ - 1) / Δ
@@ -209,7 +208,7 @@ Proof sketch:
 3. Substitute x_*, y_* and simplify using the definitions.
 4. Verify differentiability since A(x_*, y_*) = ξ^{Δ+1} > 0.
 -/
-lemma A_d_gradient_at_critical (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha₁ : 0 < a₁) (ha₂ : 0 < a₂)
+lemma A_d_gradient_at_critical (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (_ha₁ : 0 < a₁) (_ha₂ : 0 < a₂)
     (ξ : ℝ) (hξ : 1 < ξ)
     (x_star y_star : ℝ)
     (hx_star : x_star = (a₂ * ξ ^ Δ - 1) / Δ)
@@ -293,8 +292,8 @@ Proof: Substitute x_*, y_* and simplify.
 = ξ - 2sξ^Δ/Δ + (a₁+a₂)/Δ
 = Ψ_Δ(s) + (a₁+a₂)/Δ.
 -/
-lemma variational_algebraic_identity (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha₁ : 0 < a₁) (ha₂ : 0 < a₂)
-    (ξ : ℝ) (hξ : 1 < ξ)
+lemma variational_algebraic_identity (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (_ha₁ : 0 < a₁) (_ha₂ : 0 < a₂)
+    (ξ : ℝ) (_hξ : 1 < ξ)
     (x_star y_star : ℝ)
     (hx_star : x_star = (a₂ * ξ ^ Δ - 1) / Δ)
     (hy_star : y_star = (a₁ * ξ ^ Δ - 1) / Δ)
@@ -344,7 +343,7 @@ lemma domain_convex (Δ : ℕ) (hΔ : 1 ≤ Δ) :
 end AristotleLemmas
 
 lemma variational_upper_bound (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha₁ : a₁ > 0) (ha₂ : a₂ > 0) (ha₁a₂ : a₁ * a₂ < 1)
-    (x_star y_star : ℝ) (ξ : ℝ) (h_A : A_d (Δ + 1) x_star y_star = ξ ^ (Δ + 1)) :
+    (x_star y_star : ℝ) (ξ : ℝ) (_h_A : A_d (Δ + 1) x_star y_star = ξ ^ (Δ + 1)) :
     let s := a₁ * a₂
     let hs₀ : 0 < s := by aesop
     let hs₁ : s < 1 := ha₁a₂

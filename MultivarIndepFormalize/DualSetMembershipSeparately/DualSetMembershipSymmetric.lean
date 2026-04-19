@@ -79,7 +79,7 @@ lemma degree_d_plane_dominance (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_
     · rfl;
     · rcases d with ( _ | _ | d ) <;> simp_all +decide;
       · interval_cases d ; norm_num at *;
-        exact?;
+        exact R_k_monotonicity 1 (by linarith) s hs hks;
       · exact le_trans ( by simpa using R_k_monotonicity ( d + 2 ) ( by linarith ) s hs ( by aesop ) ) ih
   have hΔs : Δ = 1 → s < 2 := by intro hΔ₁; exact hks ( le_antisymm (le_of_le_of_eq hd_le hΔ₁) hd )
   refine' ⟨ mul_le_mul_of_nonneg_right ( Real.rpow_le_rpow _ h_Rk_monotonic <| by positivity ) <| by positivity, Real.rpow_le_rpow _ h_Rk_monotonic <| by positivity ⟩;
@@ -160,7 +160,7 @@ lemma Ad_partial_derivs_inequality (k : ℕ) (hk : 2 ≤ k) (x y : ℝ) (hx : 0 
       convert h_expand k hk x y hx hy using 1;
       unfold A_d; ring;
 
-lemma quadratic_concavity_condition (k : ℕ) (hk : 2 ≤ k) (α : ℝ) (hα : 0 ≤ α) (u v : ℝ) (t : ℝ) (ht : 0 ≤ t) (h_pos : 0 ≤ α + t * u ∧ 0 ≤ α + t * v) :
+lemma quadratic_concavity_condition (k : ℕ) (hk : 2 ≤ k) (α : ℝ) (_hα : 0 ≤ α) (u v : ℝ) (t : ℝ) (_ht : 0 ≤ t) (h_pos : 0 ≤ α + t * u ∧ 0 ≤ α + t * v) :
     let x := α + t * u
     let y := α + t * v
     let A := A_d k x y
@@ -183,7 +183,7 @@ lemma quadratic_concavity_condition (k : ℕ) (hk : 2 ≤ k) (α : ℝ) (hα : 0
           exact Ad_partial_derivs_inequality k hk ( α + t * u ) ( α + t * v ) h_pos.1 h_pos.2;
         nlinarith [ sq_nonneg ( ( k : ℝ ) * ( ( k - 1 ) * ( α + t * v ) + 1 ) * u - ( k : ℝ ) * ( ( k - 1 ) * ( α + t * u ) + 1 ) * v ) ]
 
-lemma Ad_composition_concavity_ineq (k : ℕ) (hk : 2 ≤ k) (x y u v : ℝ) (t : ℝ) (ht : 0 ≤ t) (h_pos : 0 ≤ x + t * u ∧ 0 ≤ y + t * v) :
+lemma Ad_composition_concavity_ineq (k : ℕ) (hk : 2 ≤ k) (x y u v : ℝ) (t : ℝ) (_ht : 0 ≤ t) (h_pos : 0 ≤ x + t * u ∧ 0 ≤ y + t * v) :
     let g := A_d k (x + t * u) (y + t * v)
     let g' := k * ((k - 1) * (y + t * v) + 1) * u + k * ((k - 1) * (x + t * u) + 1) * v
     let g'' := 2 * k * (k - 1) * u * v
@@ -233,7 +233,7 @@ lemma concave_1d_of_hessian_condition (k : ℕ) (hk : 2 ≤ k) (x y u v : ℝ) (
             · unfold A_d;
               exact Or.inl <| by nlinarith [ show ( k : ℝ ) ≥ 2 by norm_cast, show ( k : ℝ ) * ( k - 1 ) ≥ 0 by nlinarith [ show ( k : ℝ ) ≥ 2 by norm_cast ], show ( x + t * u ) * ( y + t * v ) ≥ 0 by exact mul_nonneg ( by nlinarith [ ht.1, ht.2 ] ) ( by nlinarith [ ht.1, ht.2 ] ), show ( x + t * u ) ≥ 0 by nlinarith [ ht.1, ht.2 ], show ( y + t * v ) ≥ 0 by nlinarith [ ht.1, ht.2 ] ] ;
             · unfold A_d; norm_num [ mul_comm u, mul_comm v ] ;
-              unfold deriv ; norm_num [ fderiv_deriv, mul_comm u, mul_comm v ];
+              unfold deriv ; norm_num [ fderiv_apply_one_eq_deriv, mul_comm u, mul_comm v ];
           · filter_upwards [ Ioo_mem_nhds ht.1 ht.2 ] with t ht;
             rw [ deriv_rpow_const ] <;> norm_num;
             · ring;
@@ -246,7 +246,7 @@ lemma concave_1d_of_hessian_condition (k : ℕ) (hk : 2 ≤ k) (x y u v : ℝ) (
             intros t ht;
             convert Ad_composition_concavity_ineq k hk x y u v t ht.1.le ( by constructor <;> nlinarith [ ht.1, ht.2 ] ) using 1;
             norm_num [ A_d ];
-            unfold deriv ; norm_num [ fderiv_deriv ] ; ring;
+            unfold deriv ; norm_num [ fderiv_apply_one_eq_deriv ] ; ring;
           linarith [ h_second_deriv_nonpos t <| by simpa using ht ];
         convert mul_nonpos_of_nonneg_of_nonpos ( mul_nonneg ( by positivity : 0 ≤ ( 1 : ℝ ) / k ^ 2 ) ( Real.rpow_nonneg ( show 0 ≤ A_d k ( x + t * u ) ( y + t * v ) from ?_ ) _ ) ) h_nonpos using 1;
         convert h_second_deriv t ( by simpa using ht ) using 1;
@@ -298,7 +298,7 @@ lemma tangent_plane_inequality (Δ : ℕ) (hΔ : Δ ≥ 2) (α : ℝ) (hα : 0 �
       · aesop
 
 lemma tangent_plane_in_Sd (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs : 1 ≤ s) :
-    let α := x_k Δ (by linarith) s hs (by intro h; linarith)
+    let _α := x_k Δ (by linarith) s hs (by intro h; linarith)
     let a₁ := (R_k Δ (by linarith) s hs (by intro h; linarith)) ^ (Δ : ℝ)
     let a₀ := a₁ * s ^ (Δ : ℝ)
     (a₀, a₁, a₁) ∈ S_d Δ := by
@@ -326,7 +326,7 @@ lemma eta_eq_xk (d : ℕ) (hd : 1 ≤ d) (η : ℝ) (hη : 0 ≤ η) :
         grind ) ( by
         exact x_k_spec d hd _ _ _ )
 
-lemma symmetric_weights_eq (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_le : d ≤ Δ)
+lemma symmetric_weights_eq (Δ d : ℕ) (_hΔ : Δ ≥ 2) (hd : 1 ≤ d) (_hd_le : d ≤ Δ)
     (η : ℝ) (hη : 0 ≤ η) :
     let s := (H_k d η) ^ (1 / (d : ℝ))
     let p := (Δ : ℝ) / (d : ℝ)

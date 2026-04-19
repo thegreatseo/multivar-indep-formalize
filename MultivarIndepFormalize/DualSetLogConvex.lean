@@ -8,6 +8,7 @@ log S_d is convex.
 import MultivarIndepFormalize.Definitions
 
 set_option linter.style.longLine false
+set_option linter.mathlibStandardSet false
 
 open Real
 
@@ -77,7 +78,7 @@ lemma h_hom_term3_geom_mean (d : ℕ) (hd : d ≥ 2) (w1 y1 w2 y2 : ℝ)
 /-
 Geometric mean property for the fourth term of h_hom.
 -/
-lemma h_hom_term4_geom_mean (d : ℕ) (hd : d ≥ 2) (w1 w2 : ℝ)
+lemma h_hom_term4_geom_mean (d : ℕ) (_hd : d ≥ 2) (w1 w2 : ℝ)
     (hw1 : 0 ≤ w1) (hw2 : 0 ≤ w2) :
     h_hom_term4 d (Real.sqrt (w1 * w2)) =
     Real.sqrt (h_hom_term4 d w1 * h_hom_term4 d w2) := by
@@ -121,7 +122,7 @@ lemma h_hom_CS (d : ℕ) (hd : d ≥ 2) (w1 x1 y1 w2 x2 y2 : ℝ)
             · convert h_hom_term1_geom_mean d hd w1 x1 y1 w2 x2 y2 hw1 hx1 hy1 hw2 hx2 hy2 using 1;
             · convert h_hom_term2_geom_mean d hd w1 x1 w2 x2 hw1 hx1 hw2 hx2 using 1;
           · convert h_hom_term3_geom_mean d hd w1 y1 w2 y2 hw1 hy1 hw2 hy2 using 1;
-        · exact?
+        · exact h_hom_term4_geom_mean d hd w1 w2 hw1 hw2
 
 lemma Sd_implies_h_hom_bound (d : ℕ) (hd : d ≥ 2) (a : ℝ × ℝ × ℝ) (ha : a ∈ S_d d)
     (w x y : ℝ) (hw : 0 ≤ w) (hx : 0 ≤ x) (hy : 0 ≤ y) :
@@ -152,8 +153,9 @@ lemma Sd_closed_under_geom_mean (d : ℕ) (hd : d ≥ 2) (a b : ℝ × ℝ × �
           · have := Sd_implies_h_hom_bound d hd a ha ( Real.sqrt ( b.1 / a.1 ) ) ( x * Real.sqrt ( b.2.1 / a.2.1 ) ) ( y * Real.sqrt ( b.2.2 / a.2.2 ) ) ( Real.sqrt_nonneg _ ) ( mul_nonneg hx ( Real.sqrt_nonneg _ ) ) ( mul_nonneg hy ( Real.sqrt_nonneg _ ) );
             convert this using 1;
             simp +zetaDelta at *;
-            norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, mul_assoc, mul_comm, mul_left_comm, div_eq_mul_inv, Real.sqrt_mul, ha.1.ne', ha.2.1.ne', ha.2.2.1.ne', hb.1.ne', hb.2.1.ne', hb.2.2.1.ne' ];
-            simp +decide [ ← mul_assoc, ← div_eq_mul_inv, ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ];
+            norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, mul_assoc, mul_comm, mul_left_comm, div_eq_mul_inv, Real.sqrt_mul, ha.1.ne', ha.2.1.ne', ha.2.2.1.ne', hb.1.ne', hb.2.1.ne', hb.2.2.1.ne' ]
+            set_option linter.unusedSimpArgs false in
+            simp +decide [ ← mul_assoc, ← div_eq_mul_inv, ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ]
           · convert Sd_implies_h_hom_bound d hd b hb ( Real.sqrt ( a.1 / b.1 ) ) ( x * Real.sqrt ( a.2.1 / b.2.1 ) ) ( y * Real.sqrt ( a.2.2 / b.2.2 ) ) ( Real.sqrt_nonneg _ ) ( mul_nonneg hx ( Real.sqrt_nonneg _ ) ) ( mul_nonneg hy ( Real.sqrt_nonneg _ ) ) using 1;
             simp +zetaDelta at *;
             norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, mul_assoc, mul_comm, mul_left_comm, div_eq_mul_inv, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ];
@@ -253,6 +255,4 @@ lemma Sd_log_convex (d : ℕ) (hd : d ≥ 2) :
       exact Filter.Tendsto.add ( Filter.Tendsto.smul ht_n.2.2 tendsto_const_nhds ) ( Filter.Tendsto.smul ( tendsto_const_nhds.sub ht_n.2.2 ) tendsto_const_nhds );
     exact mem_closure_of_tendsto h_tendsto ( Filter.Eventually.of_forall fun n => by obtain ⟨ k, hk₁, hk₂ ⟩ := ht_n.2.1 n; simpa [ hk₂ ] using h_dyadic n k hk₁ );
   -- Since `log_S_d` is closed (by `log_S_d_is_closed`), and dyadic rationals are dense, the set is convex. Hence, we can conclude that `log_S_d` is convex.
-  have h_closed : IsClosed (log_S_d d) := by
-    exact?;
-  exact fun u hu v hv a b ha hb hab => by simpa [ ← hab ] using h_dense u v hu hv ( a ) ha ( by linarith ) |> fun h => h_closed.closure_subset h;
+  exact fun u hu v hv a b ha hb hab => by simpa [ ← hab ] using h_dense u v hu hv ( a ) ha ( by linarith ) |> fun h => (log_S_d_is_closed d).closure_subset h;

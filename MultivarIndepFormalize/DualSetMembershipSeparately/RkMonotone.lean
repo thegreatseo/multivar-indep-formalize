@@ -72,7 +72,7 @@ lemma helper_B_k_deriv (k : ℕ) (x : ℝ) :
 /-
 Positivity of B_k and A_{k+1} for non-negative x.
 -/
-lemma helper_B_k_pos (k : ℕ) (x : ℝ) (hk : 1 ≤ k) (hx : 0 ≤ x) : 0 < B_d k x := by
+lemma helper_B_k_pos (k : ℕ) (x : ℝ) (_hk : 1 ≤ k) (hx : 0 ≤ x) : 0 < B_d k x := by
   exact add_pos_of_nonneg_of_pos ( mul_nonneg ( Nat.cast_nonneg _ ) hx ) zero_lt_one
 
 lemma helper_A_k_plus_1_pos (k : ℕ) (x : ℝ) (hk : 1 ≤ k) (hx : 0 ≤ x) : 0 < A_d (k + 1) x x := by
@@ -111,7 +111,7 @@ lemma helper_deriv_log_Rk_x (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (hx : 0 ≤ x) :
 /-
 Algebraic identities for the final simplification of the derivative.
 -/
-lemma helper_Ak_plus_1_eq_sk_plus_2x_mul_Bk (k : ℕ) (x s : ℝ) (hk : 1 ≤ k) (hx : 0 ≤ x) (hH : H_k k x = s ^ k) :
+lemma helper_Ak_plus_1_eq_sk_plus_2x_mul_Bk (k : ℕ) (x s : ℝ) (_hk : 1 ≤ k) (hx : 0 ≤ x) (hH : H_k k x = s ^ k) :
     A_d (k + 1) x x = (s ^ k + 2 * x) * B_d k x := by
       -- Substitute hH into the equation to get A_d k x x = s^k * B_d k x.
       have h_sub : A_d k x x = s ^ k * B_d k x := by
@@ -134,7 +134,7 @@ lemma helper_identity_for_log_deriv (k : ℕ) (x s : ℝ) (hk : 1 ≤ k) (hx : 0
 /-
 The denominator term in the derivative of x_k is positive.
 -/
-lemma helper_denom_pos (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (x : ℝ) (hx : 0 ≤ x)
+lemma helper_denom_pos (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (_hs : 1 < s) (x : ℝ) (hx : 0 ≤ x)
     (hH : H_k k x = s ^ k) (hks : k = 1 → s < 2) :
     2 * (k - 1) * x + 2 - s ^ k > 0 := by
       rcases k with ( _ | _ | k ) <;> norm_num at *;
@@ -176,7 +176,7 @@ lemma helper_Hk_eq_sk (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 ≤ s) (hks : k
       have h_exp : (H_k k (x_k k hk s hs hks)) ^ (1 / (k : ℝ)) = s := by
         exact ( Classical.choose_spec ( exists_unique_x_k k hk s hs hks |> ExistsUnique.exists ) ) |>.2;
       convert congr_arg ( · ^ k ) h_exp using 1 ; rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( show 0 ≤ H_k k ( x_k k hk s hs hks ) from _ ), one_div_mul_cancel ( by positivity ), Real.rpow_one ];
-      exact div_nonneg ( by rw [ show A_d k ( x_k k hk s hs hks ) ( x_k k hk s hs hks ) = k * ( k - 1 ) * ( x_k k hk s hs hks ) ^ 2 + 2 * k * ( x_k k hk s hs hks ) + 1 by exact? ] ; exact add_nonneg ( add_nonneg ( mul_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( sub_nonneg.mpr ( Nat.one_le_cast.mpr hk ) ) ) ( sq_nonneg _ ) ) ( mul_nonneg ( mul_nonneg zero_le_two ( Nat.cast_nonneg _ ) ) ( show 0 ≤ x_k k hk s hs hks from by linarith [ x_k_spec k hk s hs ‹_› ] ) ) ) zero_le_one ) ( by rw [ show B_d k ( x_k k hk s hs hks ) = k * ( x_k k hk s hs hks ) + 1 by exact? ] ; exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( show 0 ≤ x_k k hk s hs hks from by linarith [ x_k_spec k hk s hs ‹_› ] ) ) zero_le_one )
+      exact div_nonneg ( by rw [ show A_d k ( x_k k hk s hs hks ) ( x_k k hk s hs hks ) = k * ( k - 1 ) * ( x_k k hk s hs hks ) ^ 2 + 2 * k * ( x_k k hk s hs hks ) + 1 by unfold A_d; ring ] ; exact add_nonneg ( add_nonneg ( mul_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( sub_nonneg.mpr ( Nat.one_le_cast.mpr hk ) ) ) ( sq_nonneg _ ) ) ( mul_nonneg ( mul_nonneg zero_le_two ( Nat.cast_nonneg _ ) ) ( show 0 ≤ x_k k hk s hs hks from by linarith [ x_k_spec k hk s hs ‹_› ] ) ) ) zero_le_one ) ( by rw [ show B_d k ( x_k k hk s hs hks ) = k * ( x_k k hk s hs hks ) + 1 by unfold B_d; ring ] ; exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( show 0 ≤ x_k k hk s hs hks from by linarith [ x_k_spec k hk s hs ‹_› ] ) ) zero_le_one )
 
 lemma log_Rk_diff (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 → s < 2) :
     let log_Rk_ext : ℝ → ℝ := fun t => if ht: (1 ≤ t) ∧ (k = 1 → t < 2) then
@@ -223,10 +223,10 @@ lemma helper_x_k_one (k : ℕ) (hk : 1 ≤ k) :
       · norm_num;
       · convert helper_Hk_eq_sk k hk 1 ( by norm_num ) ( by norm_num ) using 1;
         norm_num;
-      · exact?
+      · unfold H_k A_d B_d; simp
 
 lemma helper_R_k_one (k : ℕ) (hk : 1 ≤ k) :
-    R_k k hk 1 le_rfl (by intro h; linarith) = 1 := by
+    R_k k hk 1 le_rfl (by intro _h; linarith) = 1 := by
       unfold R_k; norm_num [ helper_A_k_eq, helper_B_k_eq ] ;
       rw [ helper_x_k_one ] ; norm_num
 
@@ -261,7 +261,7 @@ lemma log_R_k_ext_deriv (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k
     HasDerivAt (log_R_k_ext k hk) (-s ^ (k - 1) / (s ^ k + 2 * x_k k hk s hs.le hks)) s := by
       convert log_Rk_diff k hk s hs hks using 1
 
-lemma log_R_k_ext_continuousOn (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 → s < 2) :
+lemma log_R_k_ext_continuousOn (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (_hs : 1 < s) (hks : k = 1 → s < 2) :
   ContinuousOn (log_R_k_ext k hk) (Set.Icc 1 s) := by
     -- By definition of $x_k_ext$, we know that it is continuous on $[1, s]$.
     have hx_k_ext_cont : ContinuousOn (x_k_ext k hk) (Set.Icc 1 s) := by
@@ -327,7 +327,7 @@ lemma R_k_monotonicity (d : ℕ) (hd : 1 ≤ d) (s : ℝ) (hs : 1 ≤ s) (hds : 
      implies R_{d+1}(s) ≤ R_d(s) for all s ≥ 1.
   -/
   have h_log : Real.log (R_k (d + 1) (by linarith) s hs (by intro; linarith)) ≤ Real.log (R_k d hd s hs hds) := by
-    exact?;
+    exact helper_log_R_k_monotonicity d hd s hs hds;
   contrapose! h_log; gcongr;
   refine' div_pos _ _;
   · exact Real.rpow_pos_of_pos ( by exact add_pos_of_nonneg_of_pos ( mul_nonneg ( Nat.cast_nonneg _ ) ( by linarith [ x_k_spec d hd s hs hds ] ) ) zero_lt_one ) _;
