@@ -1,21 +1,31 @@
-name: Lean Action CI
+name: Lean CI
 
 on:
   push:
+    branches:
+      - master
   pull_request:
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-# permissions:
-#   contents: read # Read access to repository contents
-#   pages: write # Write access to GitHub Pages
-#   id-token: write # Write access to ID tokens
-
 jobs:
+  # Fast job to check if your code actually works
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v5
-      - uses: leanprover/lean-action@v1
-      - uses: leanprover-community/docgen-action@v1
+      - name: Build and Test
+        uses: leanprover/lean-action@v1
+
+  # Slow job to generate documentation, only runs on master or manual trigger
+  docs:
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Generate Documentation
+        uses: leanprover-community/docgen-action@v1
