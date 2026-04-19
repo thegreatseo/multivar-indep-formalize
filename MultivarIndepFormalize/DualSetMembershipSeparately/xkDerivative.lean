@@ -31,8 +31,8 @@ The derivative of H_k(x) with respect to x.
 -/
 lemma H_k_deriv (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (hx : x ≥ 0) :
     HasDerivAt (H_k k) (k * (k * (k - 1) * x ^ 2 + 2 * (k - 1) * x + 1) / (k * x + 1) ^ 2) x := by
-  convert HasDerivAt.div ( HasDerivAt.comp x ( show HasDerivAt ( fun x : ℝ => ( k : ℝ ) * ( k - 1 ) * x ^ 2 + 2 * k * x + 1 ) _ _ from HasDerivAt.add ( HasDerivAt.add ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( hasDerivAt_pow 2 _ ) ) ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( hasDerivAt_id _ ) ) ) ( hasDerivAt_const _ _ ) ) ( hasDerivAt_id _ ) ) ( HasDerivAt.comp x ( show HasDerivAt ( fun x : ℝ => ( k : ℝ ) * x + 1 ) _ _ from HasDerivAt.add ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( hasDerivAt_id _ ) ) ( hasDerivAt_const _ _ ) ) ( hasDerivAt_id _ ) ) ?_ using 1 <;> norm_num ; ring;
-  · ext x; unfold H_k A_d B_d; ring;
+  convert HasDerivAt.div ( HasDerivAt.comp x ( show HasDerivAt ( fun x : ℝ => ( k : ℝ ) * ( k - 1 ) * x ^ 2 + 2 * k * x + 1 ) _ _ from HasDerivAt.add ( HasDerivAt.add ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( hasDerivAt_pow 2 _ ) ) ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( hasDerivAt_id _ ) ) ) ( hasDerivAt_const _ _ ) ) ( hasDerivAt_id _ ) ) ( HasDerivAt.comp x ( show HasDerivAt ( fun x : ℝ => ( k : ℝ ) * x + 1 ) _ _ from HasDerivAt.add ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( hasDerivAt_id _ ) ) ( hasDerivAt_const _ _ ) ) ( hasDerivAt_id _ ) ) ?_ using 1 <;> norm_num ; ring_nf;
+  · ext x; unfold H_k A_d B_d; ring_nf;
     simpa [ div_eq_mul_inv ] using by ring;
   · ring;
   · positivity
@@ -251,8 +251,8 @@ lemma deriv_x_k (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hks : k = 1 →
     convert hx_deriv using 1;
     convert deriv_x_k_algebraic_identity k hk x s hx ( by linarith ) hx_s |> Eq.symm using 1;
     rcases k with ( _ | k ) <;> simp_all +decide;
-    rw [ ← Real.rpow_natCast _ ( k + 1 ), ← Real.rpow_mul ( by positivity ) ] ; norm_num [ Nat.cast_add_one_ne_zero ] ; ring;
-    rw [ show ( -1 - ( k : ℝ ) + ( k : ℝ ) * ( 1 + ( k : ℝ ) ) ⁻¹ + ( 1 + ( k : ℝ ) ) ⁻¹ ) = -k by nlinarith [ mul_inv_cancel₀ ( by linarith : ( 1 + ( k : ℝ ) ) ≠ 0 ) ] ] ; norm_num [ Real.rpow_neg ( by positivity : 0 ≤ s ) ] ; ring;
+    rw [ ← Real.rpow_natCast _ ( k + 1 ), ← Real.rpow_mul ( by positivity ) ] ; norm_num [ Nat.cast_add_one_ne_zero ] ; ring_nf;
+    rw [ show ( -1 - ( k : ℝ ) + ( k : ℝ ) * ( 1 + ( k : ℝ ) ) ⁻¹ + ( 1 + ( k : ℝ ) ) ⁻¹ ) = -k by nlinarith [ mul_inv_cancel₀ ( by linarith : ( 1 + ( k : ℝ ) ) ≠ 0 ) ] ] ; norm_num [ Real.rpow_neg ( by positivity : 0 ≤ s ) ] ; ring_nf;
     -- Combine like terms and simplify the expression.
     field_simp
     ring;

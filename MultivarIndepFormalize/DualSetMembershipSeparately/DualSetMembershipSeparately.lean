@@ -67,13 +67,13 @@ lemma deriv_weight_difference (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 ≤ d) (hd_l
   -/
   have hp_ge_1 : 1 ≤  (Δ : ℝ) / d := by field_simp; exact Nat.cast_le.mpr hd_le
   field_simp;
-  convert HasDerivAt.div_const ( HasDerivAt.mul ( HasDerivAt.sub ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.rpow_const ( HasDerivAt.div_const ( HasDerivAt.sub ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.add ( HasDerivAt.add ( HasDerivAt.const_mul _ ( hasDerivAt_const _ _ ) ) ( Real.hasDerivAt_exp _ ) ) ( HasDerivAt.exp ( hasDerivAt_neg _ ) ) ) ) ( hasDerivAt_const _ _ ) ) _ ) _ ) ) ( HasDerivAt.add ( HasDerivAt.rpow_const ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( Real.hasDerivAt_exp _ ) ) _ ) ( HasDerivAt.rpow_const ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.exp ( hasDerivAt_neg _ ) ) ) _ ) ) ) ( hasDerivAt_const _ _ ) ) _ using 1 ; norm_num ; ring;
+  convert HasDerivAt.div_const ( HasDerivAt.mul ( HasDerivAt.sub ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.rpow_const ( HasDerivAt.div_const ( HasDerivAt.sub ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.add ( HasDerivAt.add ( HasDerivAt.const_mul _ ( hasDerivAt_const _ _ ) ) ( Real.hasDerivAt_exp _ ) ) ( HasDerivAt.exp ( hasDerivAt_neg _ ) ) ) ) ( hasDerivAt_const _ _ ) ) _ ) _ ) ) ( HasDerivAt.add ( HasDerivAt.rpow_const ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( Real.hasDerivAt_exp _ ) ) _ ) ( HasDerivAt.rpow_const ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.exp ( hasDerivAt_neg _ ) ) ) _ ) ) ) ( hasDerivAt_const _ _ ) ) _ using 1 ; norm_num ; ring_nf;
   · field_simp;
-    rw [ Real.mul_rpow ( by positivity ) ( by positivity ), Real.mul_rpow ( by positivity ) ( by positivity ) ] ; ring;
-    rw [ Real.mul_rpow ( by positivity ) ( by positivity ), Real.mul_rpow ( by positivity ) ( by positivity ) ] ; ring;
-    norm_num [ Real.rpow_sub hK, Real.rpow_sub ( Real.exp_pos _ ), Real.rpow_sub ( Real.exp_pos _ ) ] ; ring;
-    norm_num [ Real.exp_neg, Real.exp_log hK, ne_of_gt ( zero_lt_one.trans_le hd ) ] ; ring;
-    norm_num [ mul_assoc, mul_comm K, hK.ne', Real.exp_ne_zero ] ; ring;
+    rw [ Real.mul_rpow ( by positivity ) ( by positivity ), Real.mul_rpow ( by positivity ) ( by positivity ) ] ; ring_nf;
+    rw [ Real.mul_rpow ( by positivity ) ( by positivity ), Real.mul_rpow ( by positivity ) ( by positivity ) ] ; ring_nf;
+    norm_num [ Real.rpow_sub hK, Real.rpow_sub ( Real.exp_pos _ ), Real.rpow_sub ( Real.exp_pos _ ) ] ; ring_nf;
+    norm_num [ Real.exp_neg, Real.exp_log hK, ne_of_gt ( zero_lt_one.trans_le hd ) ] ; ring_nf;
+    norm_num [ mul_assoc, mul_comm K, hK.ne', Real.exp_ne_zero ] ; ring_nf;
     norm_num [ mul_assoc, mul_comm, mul_left_comm, Real.exp_ne_zero ];
   · exact Or.inr hp_ge_1;
   · exact Or.inl <| ne_of_gt <| mul_pos hK <| Real.exp_pos _;
@@ -184,7 +184,7 @@ Algebraic identity relating A_{d+1} to the product of B_d's.
 -/
 lemma Ad_plus_one_eq_of_prod_Bd (d : ℕ) (hd : 1 ≤ d) (η μ : ℝ) :
   A_d (d + 1) η μ = ((d + 1 : ℝ) / d) * (B_d d η * B_d d μ - 1) + 1 := by
-    unfold A_d B_d; ring;
+    unfold A_d B_d; ring_nf;
     simpa [ sq, pow_three, mul_assoc, ne_of_gt ( zero_lt_one.trans_le hd ) ] using by ring;
 
 /-
@@ -199,7 +199,7 @@ def weight_diff_fun (Δ d : ℕ) (K D : ℝ) (t : ℝ) : ℝ :=
 
 lemma weight_diff_fun_even (Δ d : ℕ) (K D : ℝ) (t : ℝ) :
   weight_diff_fun Δ d K D t = weight_diff_fun Δ d K D (-t) := by
-    unfold weight_diff_fun; ring;
+    unfold weight_diff_fun; ring_nf;
 
 /-
 Inequalities for A, B, C in the weight difference function.
@@ -285,7 +285,7 @@ Algebraic identity expressing A_d in terms of B_d.
 -/
 lemma A_d_eq_of_Bd (d : ℕ) (hd : d ≠ 0) (η μ : ℝ) :
   A_d d η μ = ((d - 1) * (B_d d η * B_d d μ) + B_d d η + B_d d μ - 1) / d := by
-    unfold A_d B_d; ring;
+    unfold A_d B_d; ring_nf;
     -- Combine like terms and simplify the expression.
     field_simp
     ring
@@ -301,16 +301,16 @@ lemma weight_triple_diff_eq_fun (Δ d : ℕ) (_hΔ : Δ ≥ 2) (hd : 1 ≤ d)
     let D := A_d (d + 1) η μ
     let w := weight_triple Δ d η μ
     w.1 - (w.2.1 + w.2.2) / Δ = weight_diff_fun Δ d K D t := by
-      unfold weight_triple weight_diff_fun B_d A_d; ring;
+      unfold weight_triple weight_diff_fun B_d A_d; ring_nf;
       rw [ Real.rpow_def_of_pos, Real.rpow_def_of_pos, Real.rpow_def_of_pos, Real.rpow_def_of_pos ];
       · rw [ Real.rpow_def_of_pos, Real.rpow_def_of_pos, Real.rpow_def_of_pos ];
         · rw [ Real.rpow_def_of_pos ] <;> norm_num;
-          · rw [ Real.sqrt_eq_rpow, Real.rpow_def_of_pos ( by positivity ) ] ; ring;
-            norm_num [ ← Real.exp_add, ← Real.exp_neg, ← Real.exp_nat_mul ] ; ring;
-            rw [ show ( d : ℝ ) * μ * ( 1 + d * η ) ⁻¹ + ( 1 + d * η ) ⁻¹ = ( 1 + d * μ ) / ( 1 + d * η ) by ring ] ; rw [ Real.log_div ( by positivity ) ( by positivity ) ] ; ring;
-            rw [ show ( 1 + ( d : ℝ ) * η + ( d : ℝ ) * μ + ( d : ℝ ) ^ 2 * η * μ ) = ( 1 + ( d : ℝ ) * η ) * ( 1 + ( d : ℝ ) * μ ) by ring ] ; rw [ Real.log_mul ( by positivity ) ( by positivity ) ] ; ring;
-            norm_num [ ← Real.exp_add, ← Real.exp_neg, mul_assoc, mul_comm, mul_left_comm, ne_of_gt ( zero_lt_one.trans_le hd ) ] ; ring;
-            rw [ Real.exp_add, Real.exp_log ( by positivity ), Real.exp_log ( by positivity ) ] ; ring;
+          · rw [ Real.sqrt_eq_rpow, Real.rpow_def_of_pos ( by positivity ) ] ; ring_nf;
+            norm_num [ ← Real.exp_add, ← Real.exp_neg, ← Real.exp_nat_mul ] ; ring_nf;
+            rw [ show ( d : ℝ ) * μ * ( 1 + d * η ) ⁻¹ + ( 1 + d * η ) ⁻¹ = ( 1 + d * μ ) / ( 1 + d * η ) by ring ] ; rw [ Real.log_div ( by positivity ) ( by positivity ) ] ; ring_nf;
+            rw [ show ( 1 + ( d : ℝ ) * η + ( d : ℝ ) * μ + ( d : ℝ ) ^ 2 * η * μ ) = ( 1 + ( d : ℝ ) * η ) * ( 1 + ( d : ℝ ) * μ ) by ring ] ; rw [ Real.log_mul ( by positivity ) ( by positivity ) ] ; ring_nf;
+            norm_num [ ← Real.exp_add, ← Real.exp_neg, mul_assoc, mul_comm, mul_left_comm, ne_of_gt ( zero_lt_one.trans_le hd ) ] ; ring_nf;
+            rw [ Real.exp_add, Real.exp_log ( by positivity ), Real.exp_log ( by positivity ) ] ; ring_nf;
             grind;
           · field_simp;
             nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast, show ( Real.sqrt ( 1 + d * η + d * μ + d ^ 2 * η * μ ) ) ≥ 1 by exact Real.le_sqrt_of_sq_le ( by nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast, mul_nonneg hη hμ ] ), Real.exp_pos ( Real.log ( ( d * μ + 1 ) / ( 1 + d * η ) ) / 2 ), Real.exp_pos ( - ( Real.log ( ( d * μ + 1 ) / ( 1 + d * η ) ) / 2 ) ), Real.add_one_le_exp ( Real.log ( ( d * μ + 1 ) / ( 1 + d * η ) ) / 2 ), Real.add_one_le_exp ( - ( Real.log ( ( d * μ + 1 ) / ( 1 + d * η ) ) / 2 ) ) ];
@@ -333,14 +333,14 @@ lemma symmetric_weight_diff_eq_fun_zero (Δ d : ℕ) (hΔ : Δ ≥ 2) (hd : 1 �
     let D := A_d (d + 1) η μ
     let w_sym := weight_triple Δ d η_sym η_sym
     w_sym.1 - (w_sym.2.1 + w_sym.2.2) / Δ = weight_diff_fun Δ d K D 0 := by
-      unfold weight_triple weight_diff_fun K_to_η B_d A_d; ring;
+      unfold weight_triple weight_diff_fun K_to_η B_d A_d; ring_nf;
       field_simp;
-      rw [ Real.rpow_neg_eq_inv_rpow ] ; norm_num ; ring;
+      rw [ Real.rpow_neg_eq_inv_rpow ] ; norm_num ; ring_nf;
       field_simp;
-      rw [ Real.sqrt_eq_rpow, ← Real.rpow_mul ( by positivity ) ] ; ring;
-      rw [ ← Real.sqrt_eq_rpow ] ; rw [ Real.sq_sqrt <| by positivity ] ; ring;
-      rw [ Real.inv_rpow ( by positivity ) ] ; ring;
-      norm_num [ sq, pow_three, mul_assoc, mul_left_comm, ne_of_gt ( zero_lt_one.trans_le hd ) ] ; ring
+      rw [ Real.sqrt_eq_rpow, ← Real.rpow_mul ( by positivity ) ] ; ring_nf;
+      rw [ ← Real.sqrt_eq_rpow ] ; rw [ Real.sq_sqrt <| by positivity ] ; ring_nf;
+      rw [ Real.inv_rpow ( by positivity ) ] ; ring_nf;
+      norm_num [ sq, pow_three, mul_assoc, mul_left_comm, ne_of_gt ( zero_lt_one.trans_le hd ) ] ; ring_nf
 
 /-
 The condition K * exp(-|t|) >= 1 holds for the parameters derived from η and μ.
@@ -354,7 +354,7 @@ lemma K_exp_neg_abs_t_ge_one (d : ℕ) (hd : 1 ≤ d) (η μ : ℝ) (hη : η �
       · rw [ abs_of_nonneg ‹_› ];
         field_simp;
         rw [ Real.sqrt_eq_rpow, Real.le_rpow_iff_log_le ] <;> norm_num;
-        · rw [ Real.log_div, Real.log_mul ] <;> ring <;> norm_num [ B_d ];
+        · rw [ Real.log_div, Real.log_mul ] <;> ring_nf <;> norm_num [ B_d ];
           · exact Real.log_nonneg ( by nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast ] );
           · positivity;
           · positivity;
@@ -573,7 +573,7 @@ lemma Phi_expression_bounded (d : ℕ) (hd : d ≥ 2) (a₁ a₂ : ℝ) (ha₁ :
     have h_g_bounded : ∃ C' > 0, ∀ x y : ℝ, 0 ≤ x → 0 ≤ y → (A_d (d + 1) x y) ^ (1 / (d + 1 : ℝ)) - a₁ * x - a₂ * y ≤ C' * (x + y + 1) ^ (2 / (d + 1 : ℝ)) - a₁ * x - a₂ * y := by
       refine' ⟨ C ^ ( 1 / ( d + 1 : ℝ ) ), Real.rpow_pos_of_pos hC.1 _, fun x y hx hy => _ ⟩;
       gcongr;
-      convert Real.rpow_le_rpow ( show 0 ≤ A_d ( d + 1 ) x y from ?_ ) ( hC.2 x y hx hy ) ( show ( 0 : ℝ ) ≤ 1 / ( d + 1 ) by positivity ) using 1 ; rw [ Real.mul_rpow ( by linarith ) ( by positivity ) ] ; rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ) ] ; ring;
+      convert Real.rpow_le_rpow ( show 0 ≤ A_d ( d + 1 ) x y from ?_ ) ( hC.2 x y hx hy ) ( show ( 0 : ℝ ) ≤ 1 / ( d + 1 ) by positivity ) using 1 ; rw [ Real.mul_rpow ( by linarith ) ( by positivity ) ] ; rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ) ] ; ring_nf;
       exact add_nonneg ( add_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( sub_nonneg.mpr ( by norm_cast; linarith ) ) ) ( by positivity ) ) ( by positivity ) ) ( mul_nonneg ( Nat.cast_nonneg _ ) ( add_nonneg ( by positivity ) ( by positivity ) ) ) ) zero_le_one;
     -- Using the bound on $g(u)$, we can show that the function $f(x, y)$ is bounded above.
     obtain ⟨C', hC', h_bound⟩ := h_g_bounded

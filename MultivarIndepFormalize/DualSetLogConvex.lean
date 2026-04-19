@@ -50,7 +50,7 @@ lemma h_hom_term1_geom_mean (d : ℕ) (hd : d ≥ 2) (w1 x1 y1 w2 x2 y2 : ℝ)
     h_hom_term1 d (Real.sqrt (w1 * w2)) (Real.sqrt (x1 * x2)) (Real.sqrt (y1 * y2)) =
     Real.sqrt (h_hom_term1 d w1 x1 y1 * h_hom_term1 d w2 x2 y2) := by
       unfold h_hom_term1;
-      rw [ eq_comm, Real.sqrt_eq_iff_mul_self_eq ] <;> first | positivity | ring ; norm_num [ hw1, hx1, hy1, hw2, hx2, hy2 ] ; ring;
+      rw [ eq_comm, Real.sqrt_eq_iff_mul_self_eq ] <;> first | positivity | ring_nf ; norm_num [ hw1, hx1, hy1, hw2, hx2, hy2 ] ; ring_nf;
       norm_num [ pow_mul', hw1, hx1, hy1, hw2, hx2, hy2 ] ; ring
 
 /-
@@ -61,7 +61,7 @@ lemma h_hom_term2_geom_mean (d : ℕ) (hd : d ≥ 2) (w1 x1 w2 x2 : ℝ)
     h_hom_term2 d (Real.sqrt (w1 * w2)) (Real.sqrt (x1 * x2)) =
     Real.sqrt (h_hom_term2 d w1 x1 * h_hom_term2 d w2 x2) := by
       unfold h_hom_term2;
-      rw [ show ( d + 1 : ℝ ) * w1 ^ d * x1 * ( ( d + 1 : ℝ ) * w2 ^ d * x2 ) = ( ( d + 1 : ℝ ) * Real.sqrt ( w1 * w2 ) ^ d * Real.sqrt ( x1 * x2 ) ) ^ 2 by repeat ring <;> norm_num [ hw1, hx1, hw2, hx2, pow_mul', mul_assoc, mul_left_comm, mul_comm ] ] ; rw [ Real.sqrt_sq <| by positivity ]
+      rw [ show ( d + 1 : ℝ ) * w1 ^ d * x1 * ( ( d + 1 : ℝ ) * w2 ^ d * x2 ) = ( ( d + 1 : ℝ ) * Real.sqrt ( w1 * w2 ) ^ d * Real.sqrt ( x1 * x2 ) ) ^ 2 by repeat ring_nf <;> norm_num [ hw1, hx1, hw2, hx2, pow_mul', mul_assoc, mul_left_comm, mul_comm ] ] ; rw [ Real.sqrt_sq <| by positivity ]
 
 /-
 Geometric mean property for the third term of h_hom.
@@ -70,9 +70,9 @@ lemma h_hom_term3_geom_mean (d : ℕ) (hd : d ≥ 2) (w1 y1 w2 y2 : ℝ)
     (hw1 : 0 ≤ w1) (hy1 : 0 ≤ y1) (hw2 : 0 ≤ w2) (hy2 : 0 ≤ y2) :
     h_hom_term3 d (Real.sqrt (w1 * w2)) (Real.sqrt (y1 * y2)) =
     Real.sqrt (h_hom_term3 d w1 y1 * h_hom_term3 d w2 y2) := by
-      unfold h_hom_term3; ring;
-      rw [ eq_comm, Real.sqrt_eq_iff_mul_self_eq ] <;> ring <;> try positivity;
-      norm_num [ pow_mul', hw1, hy1, hw2, hy2 ] ; ring;
+      unfold h_hom_term3; ring_nf;
+      rw [ eq_comm, Real.sqrt_eq_iff_mul_self_eq ] <;> ring_nf <;> try positivity;
+      norm_num [ pow_mul', hw1, hy1, hw2, hy2 ] ; ring_nf;
       norm_num [ pow_mul', hw1, hy1, hw2, hy2 ]
 
 /-
@@ -85,17 +85,17 @@ lemma h_hom_term4_geom_mean (d : ℕ) (_hd : d ≥ 2) (w1 w2 : ℝ)
       -- By definition of $h_hom_term4$, we have $h_hom_term4 d w = w^{d+1}$.
       simp [h_hom_term4];
       rw [ ← mul_pow, Real.sqrt_eq_rpow, Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ) ] ; norm_num;
-      rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ) ] ; push_cast ; ring
+      rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ) ] ; push_cast ; ring_nf
 
 /-
 Relation between h_hom and A_d.
 -/
 lemma h_hom_eq_A_d (d : ℕ) (hd : d ≥ 2) (w x y : ℝ) (hw : 0 < w) :
     h_hom d w x y = w ^ (d + 1) * A_d (d + 1) (x / w) (y / w) := by
-      unfold h_hom A_d; ring;
+      unfold h_hom A_d; ring_nf;
       -- Combine like terms and simplify the expression.
       field_simp
-      ring;
+      ring_nf;
       cases d <;> norm_num [ pow_succ' ] at * ; ring_nf at *
 
 lemma h_hom_CS (d : ℕ) (hd : d ≥ 2) (w1 x1 y1 w2 x2 y2 : ℝ)
@@ -134,9 +134,9 @@ lemma Sd_implies_h_hom_bound (d : ℕ) (hd : d ≥ 2) (a : ℝ × ℝ × ℝ) (h
         have h_bound : a.1 + a.2.1 * (x / w) + a.2.2 * (y / w) ≥ (A_d (d + 1) (x / w) (y / w)) ^ (1 / ((d : ℝ) + 1)) := by
           exact ha.2.2.2 _ _ ( div_nonneg hx ( by positivity ) ) ( div_nonneg hy ( by positivity ) );
         field_simp;
-        convert mul_le_mul_of_nonneg_left h_bound ( show 0 ≤ w by positivity ) using 1 <;> ring;
+        convert mul_le_mul_of_nonneg_left h_bound ( show 0 ≤ w by positivity ) using 1 <;> ring_nf;
         · rw [ show h_hom d w x y = w ^ ( d + 1 ) * A_d ( 1 + d ) ( x * w⁻¹ ) ( w⁻¹ * y ) by simpa [ add_comm, mul_comm, mul_assoc, mul_left_comm, hw ] using h_hom_eq_A_d d hd w x y ( by positivity ) ] ; rw [ Real.mul_rpow ( by positivity ) ( by exact ( show 0 ≤ A_d ( 1 + d ) ( x * w⁻¹ ) ( w⁻¹ * y ) from by
-                                                                                                                                                                                                                                                                unfold A_d; norm_num; positivity; ) ) ] ; rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ) ] ; norm_num [ Nat.cast_add_one_ne_zero ] ; ring;
+                                                                                                                                                                                                                                                                unfold A_d; norm_num; positivity; ) ) ] ; rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ) ] ; norm_num [ Nat.cast_add_one_ne_zero ] ; ring_nf;
           exact Or.inl ( by rw [ show ( d : ℝ ) * ( 1 + d : ℝ ) ⁻¹ + ( 1 + d : ℝ ) ⁻¹ = 1 by linarith [ mul_inv_cancel₀ ( by positivity : ( 1 + d : ℝ ) ≠ 0 ) ] ] ; norm_num );
         · simp +decide [ mul_assoc, mul_comm w, hw ]
 
@@ -170,7 +170,7 @@ lemma Sd_closed_under_geom_mean (d : ℕ) (hd : d ≥ 2) (a b : ℝ × ℝ × �
       -- By definition of $h_hom$, we know that $h_hom(w1, x1, y1) * h_hom(w2, x2, y2) \geq h_hom(1, x, y)^2$.
       have h_h_hom_prod : h_hom d (Real.sqrt (b.1 / a.1)) (x * Real.sqrt (b.2.1 / a.2.1)) (y * Real.sqrt (b.2.2 / a.2.2)) * h_hom d (Real.sqrt (a.1 / b.1)) (x * Real.sqrt (a.2.1 / b.2.1)) (y * Real.sqrt (a.2.2 / b.2.2)) ≥ h_hom d 1 x y ^ 2 := by
         have := h_hom_CS d hd ( Real.sqrt ( b.1 / a.1 ) ) ( x * Real.sqrt ( b.2.1 / a.2.1 ) ) ( y * Real.sqrt ( b.2.2 / a.2.2 ) ) ( Real.sqrt ( a.1 / b.1 ) ) ( x * Real.sqrt ( a.2.1 / b.2.1 ) ) ( y * Real.sqrt ( a.2.2 / b.2.2 ) ) ?_ ?_ ?_ ?_ ?_ ?_ <;> norm_num at *;
-        · convert this using 3 <;> norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ] ; ring ;
+        · convert this using 3 <;> norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ] ; ring_nf ;
           · norm_num [ ha.1.le, ha.2.1.le, ha.2.2.1.le, hb.1.le, hb.2.1.le, hb.2.2.1.le, ne_of_gt ha.1, ne_of_gt ha.2.1, ne_of_gt ha.2.2.1, ne_of_gt hb.1, ne_of_gt hb.2.1, ne_of_gt hb.2.2.1 ] ;
             rw [ Real.sqrt_sq hx ];
           · ring_nf; norm_num [ ha.2.2.1.le, hb.2.2.1.le, ne_of_gt ha.2.2.1, ne_of_gt hb.2.2.1 ] ;
@@ -181,7 +181,7 @@ lemma Sd_closed_under_geom_mean (d : ℕ) (hd : d ≥ 2) (a b : ℝ × ℝ × �
         · exact mul_nonneg hy ( Real.sqrt_nonneg _ );
       -- By definition of $h_hom$, we know that $h_hom(1, x, y) = A_d(d+1, x, y)$.
       have h_h_hom_one : h_hom d 1 x y = A_d (d + 1) x y := by
-        unfold h_hom A_d; ring;
+        unfold h_hom A_d; ring_nf;
         push_cast; ring;
       contrapose! h_LHS_sq;
       refine' lt_of_lt_of_le ( pow_lt_pow_left₀ h_LHS_sq ( by positivity ) ( by positivity ) ) _;
@@ -228,7 +228,7 @@ lemma Sd_log_convex (d : ℕ) (hd : d ≥ 2) :
     rintro u v ⟨ a, ha, rfl ⟩ ⟨ b, hb, rfl ⟩;
     refine' ⟨ ( Real.sqrt ( a.1 * b.1 ), Real.sqrt ( a.2.1 * b.2.1 ), Real.sqrt ( a.2.2 * b.2.2 ) ), Sd_closed_under_geom_mean d hd a b ha hb, _ ⟩;
     norm_num [ Real.log_sqrt ( mul_nonneg ( show 0 ≤ a.1 from ha.1.le ) ( show 0 ≤ b.1 from hb.1.le ) ), Real.log_sqrt ( mul_nonneg ( show 0 ≤ a.2.1 from ha.2.1.le ) ( show 0 ≤ b.2.1 from hb.2.1.le ) ), Real.log_sqrt ( mul_nonneg ( show 0 ≤ a.2.2 from ha.2.2.1.le ) ( show 0 ≤ b.2.2 from hb.2.2.1.le ) ) ];
-    rw [ Real.log_mul ( ne_of_gt ha.1 ) ( ne_of_gt hb.1 ), Real.log_mul ( ne_of_gt ha.2.1 ) ( ne_of_gt hb.2.1 ), Real.log_mul ( ne_of_gt ha.2.2.1 ) ( ne_of_gt hb.2.2.1 ) ] ; ext <;> ring;
+    rw [ Real.log_mul ( ne_of_gt ha.1 ) ( ne_of_gt hb.1 ), Real.log_mul ( ne_of_gt ha.2.1 ) ( ne_of_gt hb.2.1 ), Real.log_mul ( ne_of_gt ha.2.2.1 ) ( ne_of_gt hb.2.2.1 ) ] ; ext <;> ring_nf;
     · exact show ( Real.log a.1 + Real.log b.1 ) / 2 = Real.log a.1 * ( 1 / 2 ) + Real.log b.1 * ( 1 / 2 ) by ring;
     · exact show ( Real.log a.2.1 + Real.log b.2.1 ) / 2 = Real.log a.2.1 * ( 1 / 2 ) + Real.log b.2.1 * ( 1 / 2 ) by ring;
     · exact show ( Real.log a.2.2 + Real.log b.2.2 ) / 2 = Real.log a.2.2 * ( 1 / 2 ) + Real.log b.2.2 * ( 1 / 2 ) by ring;
@@ -239,8 +239,8 @@ lemma Sd_log_convex (d : ℕ) (hd : d ≥ 2) :
       intro n k hk_le; induction' n with n ih generalizing k <;> simp_all +decide [ pow_succ' ] ;
       · interval_cases k <;> aesop;
       · rcases Nat.even_or_odd' k with ⟨ k, rfl | rfl ⟩ <;> norm_num at *;
-        · convert ih k hk_le using 1 ; ring;
-        · convert h_midpoint_convexity _ _ _ _ _ _ ( ih k ( by linarith ) ) ( ih ( k + 1 ) ( by linarith ) ) using 1 ; norm_num ; ring;
+        · convert ih k hk_le using 1 ; ring_nf;
+        · convert h_midpoint_convexity _ _ _ _ _ _ ( ih k ( by linarith ) ) ( ih ( k + 1 ) ( by linarith ) ) using 1 ; norm_num ; ring_nf;
           ext <;> norm_num <;> ring;
     -- By the density of dyadic rationals in [0,1], we can find a sequence of dyadic rationals $t_n$ such that $t_n \to t$.
     obtain ⟨t_n, ht_n⟩ : ∃ t_n : ℕ → ℝ, (∀ n, t_n n ∈ Set.Icc 0 1) ∧ (∀ n, ∃ k : ℕ, k ≤ 2^n ∧ t_n n = k / 2^n) ∧ Filter.Tendsto t_n Filter.atTop (nhds t) := by

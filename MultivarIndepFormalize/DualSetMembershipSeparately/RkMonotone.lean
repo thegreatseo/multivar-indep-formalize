@@ -47,12 +47,12 @@ Algebraic identities relating A_{k+1}, A_k, and B_k.
 -/
 lemma helper_Ak_plus_1_eq_Ak_plus_2xBk (k : ℕ) (x : ℝ) :
     A_d (k + 1) x x = A_d k x x + 2 * x * B_d k x := by
-      unfold A_d B_d; ring;
+      unfold A_d B_d; ring_nf;
       push_cast; ring;
 
 lemma helper_Ak_plus_1_sub_2Bk_sq (k : ℕ) (x : ℝ) :
     A_d (k + 1) x x - 2 * (B_d k x) ^ 2 = -(A_d k x x - 2 * x) := by
-      unfold A_d B_d; ring;
+      unfold A_d B_d; ring_nf;
       push_cast; ring
 
 /-
@@ -97,10 +97,10 @@ lemma helper_deriv_log_Rk_x (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (hx : 0 ≤ x) :
         convert HasDerivAt.log ( HasDerivAt.div ( HasDerivAt.rpow_const ( hasDerivAt_deriv_iff.mpr _ ) _ ) ( HasDerivAt.rpow_const ( hasDerivAt_deriv_iff.mpr _ ) _ ) _ ) _ using 1 <;> norm_num [ B_d, A_d ];
         field_simp;
         any_goals first | positivity | norm_num [ mul_assoc, mul_comm, mul_left_comm ];
-        · unfold B_d; norm_num [ mul_assoc, mul_comm, mul_left_comm ] ; ring;
-          rw [ show ( - ( ( k : ℝ ) * ( 1 + k : ℝ ) ⁻¹ ) ) = ( 1 + k : ℝ ) ⁻¹ - 1 by linarith [ inv_mul_cancel₀ ( by positivity : ( 1 + k : ℝ ) ≠ 0 ) ] ] ; rw [ Real.rpow_sub_one ( by positivity ) ] ; ring;
+        · unfold B_d; norm_num [ mul_assoc, mul_comm, mul_left_comm ] ; ring_nf;
+          rw [ show ( - ( ( k : ℝ ) * ( 1 + k : ℝ ) ⁻¹ ) ) = ( 1 + k : ℝ ) ⁻¹ - 1 by linarith [ inv_mul_cancel₀ ( by positivity : ( 1 + k : ℝ ) ≠ 0 ) ] ] ; rw [ Real.rpow_sub_one ( by positivity ) ] ; ring_nf;
           field_simp;
-          rw [ show ( - ( k : ℝ ) + 1 ) / k = 1 / k - 1 by rw [ div_sub_one ] ; ring ; positivity ] ; rw [ Real.rpow_sub_one ( by positivity ) ] ; ring;
+          rw [ show ( - ( k : ℝ ) + 1 ) / k = 1 / k - 1 by rw [ div_sub_one ] ; ring ; positivity ] ; rw [ Real.rpow_sub_one ( by positivity ) ] ; ring_nf;
           field_simp
           ring;
         · exact DifferentiableAt.add ( differentiableAt_id.const_mul _ ) ( differentiableAt_const _ );

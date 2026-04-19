@@ -138,7 +138,7 @@ lemma A_d_pow_dinv_concave (d : ℕ) (hd : d ≥ 2) (Ω : Set (ℝ × ℝ))
   constructor <;> norm_num;
   · assumption;
   · intro a b ha c d hc x y hx hy hxy; specialize h_concave ( a, b ) ( c, d ) ha hc; simp_all +decide [ ConcaveOn ] ;
-    convert h_concave.2 ( show 0 ≤ 0 by norm_num ) ( show 0 ≤ 1 by norm_num ) ( show 0 ≤ 1 by norm_num ) ( show 1 ≤ 1 by norm_num ) hx hy hxy using 1 <;> ring;
-    rw [ ← eq_sub_iff_add_eq' ] at hxy ; subst_vars ; ring
+    convert h_concave.2 ( show 0 ≤ 0 by norm_num ) ( show 0 ≤ 1 by norm_num ) ( show 0 ≤ 1 by norm_num ) ( show 1 ≤ 1 by norm_num ) hx hy hxy using 1 <;> ring_nf;
+    rw [ ← eq_sub_iff_add_eq' ] at hxy ; subst_vars ; ring_nf
 
 end

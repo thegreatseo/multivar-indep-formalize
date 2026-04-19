@@ -6,7 +6,7 @@ This project was edited by [Aristotle](https://aristotle.harmonic.fun).
 
 ## The definition of the multipartite semiproper coloring polynomial
 
-The definition can be found in ...
+The definition can be found in [`MultivarIndepFormalize/Definitions.lean`](https://github.com/thegreatseo/multivar-indep-formalize/blob/master/MultivarIndepFormalize/Definitions.lean#L29).
 
 ```lean
 def Z_G_2 (η μ : V → ℝ) : ℝ :=
@@ -20,7 +20,7 @@ def Z_G_2 (η μ : V → ℝ) : ℝ :=
 
 ## The formal statement of Theorem 1.4
 
-The statement can be found in ...
+The statement can be found in [`MultivarIndepFormalize/MainTheorem.lean`](https://github.com/thegreatseo/multivar-indep-formalize/blob/master/MultivarIndepFormalize/MainTheorem.lean#L106).
 
 ```lean
 theorem semiproper_multiaff_lower_bd (η μ : V → ℝ)

@@ -111,9 +111,9 @@ lemma tangent_plane_coeffs_identity (Δ : ℕ) (hΔ : Δ ≥ 2) (s : ℝ) (hs : 
     a₁_calc = a₁_deriv ∧ a₀_calc = a₀_deriv := by
       field_simp;
       constructor;
-      · unfold R_k A_d B_d; norm_num ; ring;
-        rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by nlinarith [ show ( 0 :ℝ ) ≤ x_k Δ ( by linarith ) s hs ( by aesop ) by exact ( x_k_spec Δ ( by linarith ) s hs ( by aesop ) ) |>.1 ] ) ] ; norm_num [ show ( Δ :ℝ ) ≠ 0 by positivity ] ; ring;
-        rw [ Real.rpow_neg ( by nlinarith [ show ( 0 : ℝ ) ≤ x_k Δ ( by linarith ) s hs ( by intros; linarith ) by exact ( x_k_spec Δ ( by linarith ) s hs ( by intros; linarith ) ) |>.1 ] ) ] ; rw [ inv_pow ] ; rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by nlinarith [ show ( 0 : ℝ ) ≤ x_k Δ ( by linarith ) s hs ( by intros; linarith ) by exact ( x_k_spec Δ ( by linarith ) s hs ( by intros; linarith ) ) |>.1 ] ) ] ; ring;
+      · unfold R_k A_d B_d; norm_num ; ring_nf;
+        rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by nlinarith [ show ( 0 :ℝ ) ≤ x_k Δ ( by linarith ) s hs ( by aesop ) by exact ( x_k_spec Δ ( by linarith ) s hs ( by aesop ) ) |>.1 ] ) ] ; norm_num [ show ( Δ :ℝ ) ≠ 0 by positivity ] ; ring_nf;
+        rw [ Real.rpow_neg ( by nlinarith [ show ( 0 : ℝ ) ≤ x_k Δ ( by linarith ) s hs ( by intros; linarith ) by exact ( x_k_spec Δ ( by linarith ) s hs ( by intros; linarith ) ) |>.1 ] ) ] ; rw [ inv_pow ] ; rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by nlinarith [ show ( 0 : ℝ ) ≤ x_k Δ ( by linarith ) s hs ( by intros; linarith ) by exact ( x_k_spec Δ ( by linarith ) s hs ( by intros; linarith ) ) |>.1 ] ) ] ; ring_nf;
       · -- Substitute the expression for R_k Δ into the left-hand side.
         have h_lhs : (R_k Δ (by linarith) s hs (by intro h; linarith)) ^ (Δ : ℝ) * s ^ (Δ : ℝ) = (A_d Δ (x_k Δ (by linarith) s hs (by intro h; linarith)) (x_k Δ (by linarith) s hs (by intro h; linarith))) ^ (1 : ℝ) / (A_d (Δ + 1) (x_k Δ (by linarith) s hs (by intro h; linarith)) (x_k Δ (by linarith) s hs (by intro h; linarith))) ^ (Δ / (Δ + 1) : ℝ) := by
           unfold R_k;
@@ -192,7 +192,7 @@ lemma Ad_composition_concavity_ineq (k : ℕ) (hk : 2 ≤ k) (x y u v : ℝ) (t 
       by_cases huv : u * v ≥ 0;
       · -- By the properties of the quadratic function, we know that $k^2 A \leq 2 A_x A_y$.
         have h_quad : k^2 * ((k * (k - 1) * (x + t * u) * (y + t * v) + k * (x + t * u + y + t * v) + 1)) ≤ 2 * (k * ((k - 1) * (y + t * v) + 1)) * (k * ((k - 1) * (x + t * u) + 1)) := by
-          convert Ad_partial_derivs_inequality k hk ( x + t * u ) ( y + t * v ) h_pos.1 h_pos.2 using 1 ; ring;
+          convert Ad_partial_derivs_inequality k hk ( x + t * u ) ( y + t * v ) h_pos.1 h_pos.2 using 1 ; ring_nf;
           unfold A_d; ring;
         nlinarith [ sq_nonneg ( ( k : ℝ ) * ( ( k - 1 ) * ( y + t * v ) + 1 ) * u - ( k : ℝ ) * ( ( k - 1 ) * ( x + t * u ) + 1 ) * v ), show ( k : ℝ ) ≥ 2 by norm_cast ];
       · refine' le_trans ( mul_nonpos_of_nonneg_of_nonpos _ _ ) _;
@@ -226,7 +226,7 @@ lemma concave_1d_of_hessian_condition (k : ℕ) (hk : 2 ≤ k) (x y u v : ℝ) (
           convert HasDerivAt.congr_of_eventuallyEq _ ?_ using 1;
           use fun t => ( 1 / ( k : ℝ ) ) * ( A_d k ( x + t * u ) ( y + t * v ) ) ^ ( ( 1 / ( k : ℝ ) ) - 1 ) * deriv ( fun t => A_d k ( x + t * u ) ( y + t * v ) ) t;
           · convert HasDerivAt.mul ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.rpow_const ( hasDerivAt_deriv_iff.mpr _ ) _ ) ) ( hasDerivAt_deriv_iff.mpr _ ) using 1 <;> norm_num;
-            · rw [ show ( ( k : ℝ ) ⁻¹ - 1 - 1 ) = ( ( k : ℝ ) ⁻¹ - 2 ) by ring, show ( ( k : ℝ ) ⁻¹ - 1 ) = ( ( k : ℝ ) ⁻¹ - 2 ) + 1 by ring ] ; rw [ Real.rpow_add_one ] <;> ring ; norm_num [ show k ≠ 0 by linarith ];
+            · rw [ show ( ( k : ℝ ) ⁻¹ - 1 - 1 ) = ( ( k : ℝ ) ⁻¹ - 2 ) by ring, show ( ( k : ℝ ) ⁻¹ - 1 ) = ( ( k : ℝ ) ⁻¹ - 2 ) + 1 by ring ] ; rw [ Real.rpow_add_one ] <;> ring_nf ; norm_num [ show k ≠ 0 by linarith ];
               · simp +decide [ sq, mul_assoc, ne_of_gt ( zero_lt_two.trans_le hk ) ];
               · exact ne_of_gt ( add_pos_of_nonneg_of_pos ( add_nonneg ( mul_nonneg ( mul_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) ( sub_nonneg.mpr ( Nat.one_le_cast.mpr ( by linarith ) ) ) ) ( by nlinarith [ ht.1, ht.2 ] ) ) ( by nlinarith [ ht.1, ht.2 ] ) ) ( mul_nonneg ( Nat.cast_nonneg _ ) ( by nlinarith [ ht.1, ht.2 ] ) ) ) zero_lt_one );
             · unfold A_d; norm_num [ mul_assoc, mul_comm u, mul_comm v ] ;
@@ -246,7 +246,7 @@ lemma concave_1d_of_hessian_condition (k : ℕ) (hk : 2 ≤ k) (x y u v : ℝ) (
             intros t ht;
             convert Ad_composition_concavity_ineq k hk x y u v t ht.1.le ( by constructor <;> nlinarith [ ht.1, ht.2 ] ) using 1;
             norm_num [ A_d ];
-            unfold deriv ; norm_num [ fderiv_apply_one_eq_deriv ] ; ring;
+            unfold deriv ; norm_num [ fderiv_apply_one_eq_deriv ] ; ring_nf;
           linarith [ h_second_deriv_nonpos t <| by simpa using ht ];
         convert mul_nonpos_of_nonneg_of_nonpos ( mul_nonneg ( by positivity : 0 ≤ ( 1 : ℝ ) / k ^ 2 ) ( Real.rpow_nonneg ( show 0 ≤ A_d k ( x + t * u ) ( y + t * v ) from ?_ ) _ ) ) h_nonpos using 1;
         convert h_second_deriv t ( by simpa using ht ) using 1;
@@ -287,9 +287,9 @@ lemma tangent_plane_inequality (Δ : ℕ) (hΔ : Δ ≥ 2) (α : ℝ) (hα : 0 �
             unfold A_d; norm_num; positivity;
           simpa [ div_eq_inv_mul ] using h_deriv.tendsto_slope_zero_right;
         exact le_of_not_gt fun h => absurd ( le_of_tendsto_of_tendsto tendsto_const_nhds h_deriv <| Filter.eventually_of_mem ( Ioo_mem_nhdsGT_of_mem ⟨ by norm_num, by norm_num ⟩ ) fun t ht => h_concave t ht ) ( by linarith );
-      convert h_concave.ge using 1 ; ring!;
-      · rw [ deriv_rpow_const ] <;> norm_num ; ring!;
-        · unfold A_d; norm_num [ mul_comm α, mul_comm x, mul_comm y ] ; ring;
+      convert h_concave.ge using 1 ; ring_nf!;
+      · rw [ deriv_rpow_const ] <;> norm_num ; ring_nf!;
+        · unfold A_d; norm_num [ mul_comm α, mul_comm x, mul_comm y ] ; ring_nf;
           -- Combine like terms and simplify the expression.
           field_simp
           ring;
@@ -343,7 +343,7 @@ lemma symmetric_weights_eq (Δ d : ℕ) (_hΔ : Δ ≥ 2) (hd : 1 ≤ d) (_hd_le
       · unfold R_k
         generalize_proofs at *;
         rw [ ← eta_eq_xk d hd η hη ];
-        rw [ Real.div_rpow ( by exact Real.rpow_nonneg ( by exact le_of_lt ( by exact helper_B_k_pos d η hd hη ) ) _ ) ( by exact Real.rpow_nonneg ( by exact le_of_lt ( by exact helper_A_k_plus_1_pos d η hd hη ) ) _ ), ← Real.rpow_mul ( by exact le_of_lt ( by exact helper_B_k_pos d η hd hη ) ), ← Real.rpow_mul ( by exact le_of_lt ( by exact helper_A_k_plus_1_pos d η hd hη ) ) ] ; ring;
+        rw [ Real.div_rpow ( by exact Real.rpow_nonneg ( by exact le_of_lt ( by exact helper_B_k_pos d η hd hη ) ) _ ) ( by exact Real.rpow_nonneg ( by exact le_of_lt ( by exact helper_A_k_plus_1_pos d η hd hη ) ) _ ), ← Real.rpow_mul ( by exact le_of_lt ( by exact helper_B_k_pos d η hd hη ) ), ← Real.rpow_mul ( by exact le_of_lt ( by exact helper_A_k_plus_1_pos d η hd hη ) ) ] ; ring_nf;
       · unfold H_k;
         rw [ Real.div_rpow ];
         · rw [ Real.div_rpow ( by exact Real.rpow_nonneg ( by exact le_of_lt ( show 0 < A_d d η η from by
@@ -351,7 +351,7 @@ lemma symmetric_weights_eq (Δ d : ℕ) (_hΔ : Δ ≥ 2) (hd : 1 ≤ d) (_hd_le
                                                                                 field_simp;
                                                                                 exact add_pos_of_nonneg_of_pos ( mul_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) hη ) ( by nlinarith [ show ( d : ℝ ) ≥ 1 by norm_cast ] ) ) zero_lt_one ) ) _ ) ( by exact Real.rpow_nonneg ( by exact le_of_lt ( show 0 < B_d d η from by
                                                                                                                                                                             exact add_pos_of_nonneg_of_pos ( mul_nonneg ( Nat.cast_nonneg _ ) hη ) zero_lt_one ) ) _ ) ];
-          rw [ ← Real.rpow_mul, ← Real.rpow_mul ] <;> ring;
+          rw [ ← Real.rpow_mul, ← Real.rpow_mul ] <;> ring_nf;
           · rw [ mul_inv_cancel_right₀ ( ne_of_gt ( Real.rpow_pos_of_pos ( show 0 < B_d d η from by unfold B_d; positivity ) _ ) ) ];
           · exact add_nonneg ( mul_nonneg ( Nat.cast_nonneg _ ) hη ) zero_le_one;
           · unfold A_d;

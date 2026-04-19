@@ -40,8 +40,8 @@ Proof: Divide f(X)=0 by X^(Δ+1) and rearrange terms.
 lemma f_poly_eq_h_aux_iff (Δ : ℕ) (s X : ℝ) (hX : 0 < X) :
     f_poly Δ s X = 0 ↔ h_aux Δ s X = Δ := by
       unfold f_poly h_aux;
-      rw [ sub_div', div_eq_iff ] <;> first | positivity | ring;
-      norm_num [ Real.rpow_add hX, Real.rpow_neg_one ] ; ring;
+      rw [ sub_div', div_eq_iff ] <;> first | positivity | ring_nf;
+      norm_num [ Real.rpow_add hX, Real.rpow_neg_one ] ; ring_nf;
       norm_cast ; simp +decide [mul_assoc, mul_comm, mul_left_comm, hX.ne'];
       constructor <;> intro h <;> linear_combination h
 
@@ -80,8 +80,8 @@ lemma h_aux_tendsto_atTop (Δ : ℕ) (hΔ : 2 ≤ Δ) (s : ℝ) (hs : 0 < s) :
       -- The second term $-1/X^{Δ+1}$ tends to 0 as $X$ tends to infinity because $Δ+1 > 0$.
       have h_term2 : Filter.Tendsto (fun X : ℝ => -1 / X ^ ((Δ : ℝ) + 1)) Filter.atTop (nhds 0) := by
         exact tendsto_const_nhds.div_atTop ( tendsto_rpow_atTop ( by positivity ) );
-      convert h_term1.atTop_add h_term2 using 1 ; ring;
-      ext; unfold h_aux; ring
+      convert h_term1.atTop_add h_term2 using 1 ; ring_nf;
+      ext; unfold h_aux; ring_nf
 
 
 /--
@@ -237,19 +237,19 @@ lemma A_d_gradient_at_critical (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (_h
           rw [h_deriv_x];
           -- Substitute the expression for the derivative into the goal and simplify.
           have h_simp : ((Δ + 1) * Δ * x_star * y_star + (Δ + 1) * (x_star + y_star) + 1) = ξ ^ (Δ + 1) := by
-            rw [ hx_star, hy_star ] ; ring;
+            rw [ hx_star, hy_star ] ; ring_nf;
             field_simp;
             grind;
           rw [ h_simp ];
           rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by positivity ), Nat.cast_add_one, mul_sub, mul_one, mul_div_cancel₀ _ ( by positivity ) ] ; norm_num;
           field_simp [hy_star]
-          ring;
+          ring_nf;
           rw [ hy_star ] ; linarith [ mul_div_cancel₀ ( a₁ * ξ ^ Δ - 1 ) ( by positivity : ( Δ : ℝ ) ≠ 0 ) ];
         have h_deriv_y : deriv (fun y => ((Δ + 1) * Δ * x_star * y + (Δ + 1) * (x_star + y) + 1) ^ (1 / (Δ + 1 : ℝ))) y_star = a₂ := by
           convert HasDerivAt.deriv ( HasDerivAt.rpow_const ( HasDerivAt.add ( HasDerivAt.add ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( hasDerivAt_id _ ) ) ( HasDerivAt.mul ( hasDerivAt_const _ _ ) ( HasDerivAt.add ( hasDerivAt_const _ _ ) ( hasDerivAt_id _ ) ) ) ) ( hasDerivAt_const _ _ ) ) _ ) using 1 <;> norm_num;
           · field_simp [hx_star, hy_star];
             rw [ hx_star, hy_star ];
-            rw [ mul_div_cancel₀ _ ( by positivity ) ] ; ring;
+            rw [ mul_div_cancel₀ _ ( by positivity ) ] ; ring_nf;
             rw [ show ( 1 + a₂ * ξ ^ ( Δ * 2 ) * ( Δ : ℝ ) * a₁ * ( Δ : ℝ ) ⁻¹ + a₂ * ξ ^ ( Δ * 2 ) * a₁ * ( Δ : ℝ ) ⁻¹ + ( - ( ( Δ : ℝ ) * ( Δ : ℝ ) ⁻¹ ) - ( Δ : ℝ ) ⁻¹ ) ) = ( ξ ^ ( Δ + 1 ) ) by
                   field_simp;
                   ring_nf at * ; linarith ];
@@ -280,8 +280,8 @@ lemma A_d_gradient_at_critical (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (_h
             ring_nf at *;
             nlinarith [ show ( Δ : ℝ ) * ξ > 0 by positivity, show ( Δ : ℝ ) * ξ ^ Δ > 0 by positivity, show ( Δ : ℝ ) * ξ ^ ( Δ * 2 ) > 0 by positivity, show ( Δ : ℝ ) * a₂ * ξ ^ Δ > 0 by positivity, show ( Δ : ℝ ) * a₂ * ξ ^ ( Δ * 2 ) > 0 by positivity, show ( Δ : ℝ ) * a₁ * ξ ^ Δ > 0 by positivity, show ( Δ : ℝ ) * a₁ * ξ ^ ( Δ * 2 ) > 0 by positivity ];
           · exact differentiableAt_const _ |> DifferentiableAt.prodMk <| differentiableAt_id;
-        intro u v; rw [ ← h_deriv, ← ‹deriv ( fun y => ( ( Δ + 1 : ℝ ) * Δ * x_star * y + ( Δ + 1 : ℝ ) * ( x_star + y ) + 1 ) ^ ( 1 / ( Δ + 1 : ℝ ) ) ) y_star = a₂› ] ; rw [ h_deriv_x, h_deriv_y ] ; ring;
-        rw [ show ( u, v ) = u • ( 1, 0 ) + v • ( 0, 1 ) by ext <;> simp +decide ] ; rw [ map_add, map_smul, map_smul ] ; ring;
+        intro u v; rw [ ← h_deriv, ← ‹deriv ( fun y => ( ( Δ + 1 : ℝ ) * Δ * x_star * y + ( Δ + 1 : ℝ ) * ( x_star + y ) + 1 ) ^ ( 1 / ( Δ + 1 : ℝ ) ) ) y_star = a₂› ] ; rw [ h_deriv_x, h_deriv_y ] ; ring_nf;
+        rw [ show ( u, v ) = u • ( 1, 0 ) + v • ( 0, 1 ) by ext <;> simp +decide ] ; rw [ map_add, map_smul, map_smul ] ; ring_nf;
         norm_num [ mul_comm ]
 
 /-
@@ -301,8 +301,8 @@ lemma variational_algebraic_identity (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : �
     (hs₀ : 0 < s) (hs₁ : s < 1)
     (h_xi_def : ξ = xi_Δ Δ hΔ s hs₀ hs₁) :
     ξ - a₁ * x_star - a₂ * y_star = Psi_Delta Δ hΔ s hs₀ hs₁ + (a₁ + a₂) / Δ := by
-      unfold Psi_Delta; ring;
-      rw [ ← h_xi_def ] ; rw [ hx_star, hy_star, hs ] ; ring;
+      unfold Psi_Delta; ring_nf;
+      rw [ ← h_xi_def ] ; rw [ hx_star, hy_star, hs ] ; ring_nf;
       norm_cast ; ring
 
 lemma domain_convex (Δ : ℕ) (hΔ : 1 ≤ Δ) :
@@ -386,10 +386,10 @@ lemma variational_upper_bound (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ) (ha�
       have h_ineq : DifferentiableAt ℝ (fun p : ℝ × ℝ => (A_d (Δ + 1) p.1 p.2) ^ (1 / ((Δ : ℝ) + 1))) (x_star, y_star) ∧ ∀ u v : ℝ, fderiv ℝ (fun p : ℝ × ℝ => (A_d (Δ + 1) p.1 p.2) ^ (1 / ((Δ : ℝ) + 1))) (x_star, y_star) (u, v) = a₁ * u + a₂ * v := by
         convert A_d_gradient_at_critical Δ hΔ a₁ a₂ ha₁ ha₂ ξ hξ_pos.1 x_star y_star hx_star hy_star _ using 1;
         convert hξ_pos.2 using 1;
-        unfold f_poly; ring;
+        unfold f_poly; ring_nf;
         norm_cast ; ring;
       have := concave_gradient_inequality ( show Convex ℝ { p : ℝ × ℝ | p.1 > -1 / ( Δ : ℝ ) ∧ p.2 > -1 / ( Δ : ℝ ) ∧ A_d ( Δ + 1 ) p.1 p.2 > 0 } from ?_ ) ‹_› ( show ( x_star, y_star ) ∈ interior { p : ℝ × ℝ | p.1 > -1 / ( Δ : ℝ ) ∧ p.2 > -1 / ( Δ : ℝ ) ∧ A_d ( Δ + 1 ) p.1 p.2 > 0 } from ?_ ) hp h_ineq.1;
-      · convert this using 1 ; rw [ h_ineq.2 ] ; ring;
+      · convert this using 1 ; rw [ h_ineq.2 ] ; ring_nf;
         norm_num ; ring;
       · convert domain_convex Δ ( by linarith ) using 1;
       · refine' mem_interior_iff_mem_nhds.mpr _;
@@ -459,8 +459,8 @@ lemma symmetric_value_at_critical (Δ : ℕ) (hΔ : 2 ≤ Δ) (a : ℝ) (ha₀ :
         have := hξ₂ ( xi_Δ Δ hΔ ( a * a ) ( by positivity ) ( by nlinarith ) ) ⟨ ?_, ?_ ⟩ <;> norm_num [ f_poly ] at *;
         · field_simp;
           rw [ show A_d ( Δ + 1 ) ( ( a * xi_Δ Δ hΔ ( a ^ 2 ) ( by positivity ) ( by nlinarith ) ^ Δ - 1 ) / Δ ) ( ( a * xi_Δ Δ hΔ ( a ^ 2 ) ( by positivity ) ( by nlinarith ) ^ Δ - 1 ) / Δ ) = ξ ^ ( Δ + 1 ) from ?_ ];
-          · rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by linarith ) ] ; norm_num [ Nat.cast_add_one_ne_zero ] ; ring;
-            unfold Psi_Delta; norm_num [ this ] ; ring;
+          · rw [ ← Real.rpow_natCast, ← Real.rpow_mul ( by linarith ) ] ; norm_num [ Nat.cast_add_one_ne_zero ] ; ring_nf;
+            unfold Psi_Delta; norm_num [ this ] ; ring_nf;
             rw [ show xi_Δ Δ hΔ ( a ^ 2 ) ( by positivity ) ( by nlinarith ) = ξ by simpa only [ sq ] using this ] ; nlinarith [ mul_inv_cancel_left₀ ( by positivity : ( Δ : ℝ ) ≠ 0 ) ( a ^ 2 * ξ ^ Δ ) ];
           · convert critical_point_in_Ω Δ hΔ a a ha₀ ha₀ ξ hξ₁.1 _ |> And.right using 1;
             · norm_num [ ← this, sq ];
@@ -654,5 +654,5 @@ lemma Phi_upper_bound (Δ : ℕ) (hΔ : 2 ≤ Δ) (a₁ a₂ : ℝ)
   refine ⟨ h_le, ?_ ⟩;
   intro h_eq;
   convert symmetric_equality Δ hΔ a₁ ha₁ _ |> And.right using 1;
-  all_goals subst h_eq; ring;
+  all_goals subst h_eq; ring_nf;
   nlinarith
